@@ -2,8 +2,6 @@ import express from "express";
 import { getRepository } from "typeorm";
 import { User } from "../types/user";
 import jwt from "jsonwebtoken";
-import path from "path";
-import fs from "fs";
 
 let router = express.Router();
 
@@ -50,13 +48,6 @@ router.post("/sign-in",async (req, res) => {
     } else {
         res.status(403).json({ "error": "Bad credentials" });
     }
-});
-
-router.get("/ppic/:username", (req, res) => {
-    console.log(req.params.username);
-    let ppicPath = path.join(__dirname, "../../ppics/" + req.params.username + ".png");
-    if(!fs.existsSync(ppicPath)) { ppicPath = path.join(__dirname, "../../ppics/default.png" );}
-    res.sendFile(ppicPath);
 });
 
 function requireToken(req, res, next) {

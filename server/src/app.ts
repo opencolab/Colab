@@ -22,6 +22,9 @@ export { io, http }
 import { router as authRouter } from "./route/auth";
 app.use("/auth", authRouter);
 
+import { router as userRouter } from "./route/user";
+app.use("/user", userRouter);
+
 createConnection({
     type: "mysql",
     host: "localhost",
