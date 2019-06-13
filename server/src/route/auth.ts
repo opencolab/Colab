@@ -51,7 +51,7 @@ router.post("/sign-in",async (req, res) => {
 });
 
 function requireToken(req, res, next) {
-    let bHeader = req.header('Authorization');
+    let bHeader = req.header("Authorization");
     if(bHeader) {
         jwt.verify(bHeader.split(' ')[1], process.env.JWT_KEY, function(err, decoded) {
             if(err) {
