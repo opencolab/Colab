@@ -10,6 +10,12 @@ export class User {
     email: string;
 
     @Column()
+    fname: string;
+
+    @Column()
+    lname: string;
+
+    @Column()
     hash: string;
 
 }
