@@ -1,0 +1,8 @@
+## IDE
+.idea/
+
+## NodeJS
+node_modules/
+
+## TypeScript
+dist/
