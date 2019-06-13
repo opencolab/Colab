@@ -6,15 +6,18 @@
   "scripts": {
     "start": "npm run serve",
     "serve": "node dist/app.js",
-    "build-ts" : "tsc",
-    "watch-ts" : "tsc -w",
+    "build-ts": "tsc",
+    "watch-ts": "tsc -w",
     "watch-node": "nodemon dist/app.js",
-    "serve-dev" : "tsc && concurrently -k \"npm run watch-node\" \"npm run watch-ts\""
+    "serve-dev": "tsc && npm run serve",
+    "watch-serve-dev": "tsc && concurrently -k \"npm run watch-node\" \"npm run watch-ts\""
   },
   "devDependencies": {
     "@types/body-parser": "^1.17.0",
     "@types/cors": "^2.8.5",
     "@types/express": "^4.17.0",
+    "@types/jsonwebtoken": "^8.3.2",
+    "@types/node": "^12.0.8",
     "@types/socket.io": "^2.1.2",
     "concurrently": "^4.1.0",
     "nodemon": "^1.19.1",
@@ -23,6 +26,10 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.17.1",
-    "socket.io": "^2.2.0"
+    "jsonwebtoken": "^8.5.1",
+    "mysql": "^2.17.1",
+    "reflect-metadata": "^0.1.13",
+    "socket.io": "^2.2.0",
+    "typeorm": "^0.2.18"
   }
 }
