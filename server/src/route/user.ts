@@ -33,7 +33,7 @@ router.post("/update-profile", requireToken, ppicUpload.single("ppic"), async (r
         res.sendStatus(200);
     } else {
         fs.unlinkSync(req.file.path);
-        res.sendStatus(403);
+        res.status(403).json({ error: "Bad Credentials" });
     }
 });
 
