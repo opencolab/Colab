@@ -1,30 +1,32 @@
-import { Suser } from "./suser";
+import { Sessioneer } from "./sessioneer";
 
 export class Session {
 
     name: string;
-    owner: Suser;
-    users: Array<Suser>;
+    owner: Sessioneer;
+    sesssioneers: Array<Sessioneer>;
 
     constructor(name: string) {
         this.name = name;
-        this.users = new Array<Suser>();
+        this.sesssioneers = new Array<Sessioneer>();
     }
 
-    addUser(username: string, socketId) {
-        let user = new Suser(username, socketId);
-        this.users.push(user);
-        return user;
+    add(username: string, socketId: string) {
+        let sessioneer = new Sessioneer(username, socketId);
+        this.sesssioneers.push(sessioneer);
+        return sessioneer;
     }
 
-    removeUser(userID: string) {
-        this.users = this.users.filter((user) => { return (user.socketId != userID); });
-    }
+    remove(socketId: string) {
+        let sessioneer: Sessioneer = null;
+        for(let i = 0; i < this.sesssioneers.length; ++i) {
+            if(this.sesssioneers[i].socketId == socketId) { sessioneer = this.sesssioneers[i]; break; }
+        }
 
-    getUsernames() {
-        let usernames = [];
-        this.users.forEach((user) => { usernames.push(user.username); });
-        return usernames;
+        if(sessioneer != null) {
+            this.sesssioneers = this.sesssioneers.splice(this.sesssioneers.indexOf(sessioneer), 1);
+        }
+        return sessioneer;
     }
 
 }

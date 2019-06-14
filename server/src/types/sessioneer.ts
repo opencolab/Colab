@@ -1,4 +1,4 @@
-export class Suser {
+export class Sessioneer {
 
     username: string;
     socketId: string;
