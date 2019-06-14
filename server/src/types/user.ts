@@ -9,6 +9,12 @@ export class User {
     @Column()
     email: string;
 
+    @Column({ default: "" })
+    fname: string;
+
+    @Column({ default: "" })
+    lname: string;
+
     @Column()
     hash: string;
 

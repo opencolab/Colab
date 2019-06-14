@@ -25,6 +25,9 @@ app.use("/auth", authRouter);
 import { router as userRouter } from "./route/user";
 app.use("/user", userRouter);
 
+import { router as sessionRouter } from "./route/session";
+app.use("/session", sessionRouter);
+
 createConnection({
     type: "mysql",
     host: "localhost",
