@@ -1,4 +1,4 @@
-export class Sessioneer {
+export class Peer {
 
     username: string;
     socketId: string;

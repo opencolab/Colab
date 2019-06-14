@@ -21,18 +21,21 @@ router.post("/create-session/:sname", requireToken, (req, res) => {
     session.on("connection", socket => {
 
         socket.on("disconnect", () => {
-            let sessioner = sessions[session.name].remove(socket.id);
-            if(sessions[session.name].sesssioneers.length == 0) {
+            let peer = sessions[session.name].remove(socket.id);
+            if(sessions[session.name].peers.length == 0) {
                 session.removeAllListeners();
                 delete sessions[session.name];
                 delete io.nsps[session.name];
             } else {
-                session.emit("user-left", sessioner.username)
+                session.emit("user-left", peer.username)
             }
         });
 
     })
-
 });
+
+function on(socket) {
+    
+}
 
 export { router }
