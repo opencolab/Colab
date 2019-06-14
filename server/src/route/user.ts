@@ -13,7 +13,12 @@ let ppicStorage = multer.diskStorage({
     filename: (req, file, cb) => { cb(null, req["token"].username + path.extname(file.originalname) + ".tmp"); }
 });
 
-let ppicUpload = multer({ storage: ppicStorage });
+let ppicFilter = (req, file, cb) => {
+    if(!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) { return cb(new Error("Not a supported image type"), false); }
+    cb(null, true);
+};
+
+let ppicUpload = multer({ storage: ppicStorage, fileFilter: ppicFilter });
 
 router.post("/update-profile", requireToken, ppicUpload.single("ppic"), async (req, res) => {
     let userRepo = getRepository(User);
@@ -22,6 +27,7 @@ router.post("/update-profile", requireToken, ppicUpload.single("ppic"), async (r
 
     if(req.body.oldHash == user.hash) {
         fs.renameSync(req.file.path, req.file.path.slice(0, -4));
+        fs.writeFileSync(path.join(__dirname, "../../ppics/") + req["token"].username + ".meta", path.extname(req.file.originalname).slice(1));
 
         if(req.body.email) { user.email = req.body.email; }
         if(req.body.fname) { user.fname = req.body.fname; }
@@ -38,8 +44,11 @@ router.post("/update-profile", requireToken, ppicUpload.single("ppic"), async (r
 });
 
 router.get("/ppic/:username", (req, res) => {
-    let ppicPath = path.join(__dirname, "../../ppics/" + req.params.username + ".png");
-    if(!fs.existsSync(ppicPath)) { ppicPath = path.join(__dirname, "../../ppics/default.png" );}
+    let ppicPath = path.join(__dirname, "../../ppics/" + req.params.username + ".meta");
+    if(fs.existsSync(ppicPath)) { ppicPath = ppicPath.slice(0, -5) + "." + fs.readFileSync(ppicPath); }
+    else {
+        ppicPath = path.join(__dirname, "../../ppics/default.png");
+    }
     res.sendFile(ppicPath);
 });
 
