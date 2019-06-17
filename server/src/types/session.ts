@@ -1,32 +1,37 @@
-import { Peer } from "./peer";
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import { Membership } from "./membership";
 
+export enum Privacy {
+    PUBLIC = "public",
+    HIDDEN = "editor",
+    PRIVATE = "private"
+}
+
+@Entity()
 export class Session {
 
-    name: string;
-    owner: Peer;
-    peers: Array<Peer>;
+    @PrimaryGeneratedColumn("uuid")
+    id: string;
+
+    @Column()
+    sname: string;
+
+    @Column({
+        type: "enum",
+        enum: Privacy,
+        default: Privacy.PUBLIC
+    })
+    privacy: Privacy;
+
+
+    @Column({ default: "" })
+    description: string;
 
     constructor(name: string) {
-        this.name = name;
-        this.peers = new Array<Peer>();
+        this.sname = name;
     }
 
-    add(username: string, socketId: string) {
-        let sessioneer = new Peer(username, socketId);
-        this.peers.push(sessioneer);
-        return sessioneer;
-    }
-
-    remove(socketId: string) {
-        let peer: Peer = null;
-        for(let i = 0; i < this.peers.length; ++i) {
-            if(this.peers[i].socketId == socketId) { peer = this.peers[i]; break; }
-        }
-
-        if(peer != null) {
-            this.peers = this.peers.splice(this.peers.indexOf(peer), 1);
-        }
-        return peer;
-    }
+    @OneToMany(() => Membership, membership => membership.session, { cascade: true, onDelete: "CASCADE"})
+    memberships: Membership[];
 
 }

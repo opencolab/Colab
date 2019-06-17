@@ -19,11 +19,11 @@ router.post("/sign-up",async (req, res) => {
     let userRepo = getRepository(User);
 
     if(await userRepo.findOne({ where: { username: req.body.user.username }})) {
-        return res.status(400).json({ "error": "Username name already exists" });
+        return res.status(400).json({ "error": "Username sname already exists" });
     }
 
     if(await userRepo.findOne({ where: { email: req.body.user.email }})) {
-        return res.status(400).json({ "error": "Email name already exists" });
+        return res.status(400).json({ "error": "Email sname already exists" });
     }
 
     await userRepo.save(user);

@@ -2,6 +2,8 @@ import "reflect-metadata";
 import { createConnection } from "typeorm";
 
 import { User } from "./types/user";
+import { Session } from "./types/session";
+import { Membership } from "./types/membership";
 
 import express from "express";
 import bodyParser from "body-parser";
@@ -23,10 +25,10 @@ import { router as authRouter } from "./route/auth";
 app.use("/auth", authRouter);
 
 import { router as userRouter } from "./route/user";
-app.use("/user", userRouter);
+app.use("/users", userRouter);
 
 import { router as sessionRouter } from "./route/session";
-app.use("/session", sessionRouter);
+app.use("/sessions", sessionRouter);
 
 createConnection({
     type: "mysql",
@@ -35,7 +37,7 @@ createConnection({
     username: process.env.MYSQL_USER,
     password: process.env.MYSQL_PASS,
     database: "open-colab",
-    entities: [ User ],
+    entities: [ User, Session, Membership ],
     synchronize: true
 }).then(()  => {
     http.listen(process.env.PORT || 4213, () => {
