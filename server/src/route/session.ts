@@ -8,6 +8,7 @@ import fs from "fs";
 import path from "path";
 import {Membership, Role} from "../types/membership";
 import {User} from "../types/user";
+import {Task} from "../types/task";
 
 let router = express.Router();
 
@@ -93,25 +94,27 @@ router.get("/join/:sessionId",  requireToken, async (req, res) => {
     let membershipRepo = getRepository(Membership);
     let membership = null;
 
+    for(let i = 0; i < session.memberships.length; ++i) {
+        if(session.memberships[i].user.username == req["token"].username) {
+            membership = session.memberships[i];
+            break;
+        }
+    }
+
     switch (session.privacy) {
         case Privacy.PUBLIC:
         case Privacy.HIDDEN:
-            membership = new Membership();
-            membership.session = session;
-            membership.user = req["token"].username;
-            membership.role = Role.GHOST;
-            await membershipRepo.save(membership);
+            if(!membership) {
+                membership = new Membership();
+                membership.session = session;
+                membership.user = req["token"].username;
+                membership.role = Role.GHOST;
+                await membershipRepo.save(membership);
+            }
             res.sendStatus(200);
             break;
         case Privacy.PRIVATE:
-            membership = null;
-            for(let i = 0; i < session.memberships.length; ++i) {
-                if(session.memberships[i].user.username == req["token"].username) {
-                    membership = session.memberships[i];
-                    break;
-                }
-            }
-            if(!membership) { res.status(403).json({ "error": "Not invited to this session" }); } else {
+            if(!membership) { return res.status(403).json({ "error": "Not invited to this session" }); } else {
                 if(membership.role == Role.PENDING) {
                     membership.role = Role.GHOST;
                     await membershipRepo.save(membership);
@@ -120,6 +123,7 @@ router.get("/join/:sessionId",  requireToken, async (req, res) => {
             }
             break;
     }
+    createUserFiles(session.id, req["token"].username);
 });
 
 router.post("/create-session", requireToken, async (req, res) => {
@@ -143,24 +147,65 @@ router.post("/create-session", requireToken, async (req, res) => {
 
     membership.role = Role.OWNER;
 
-    membership = await membershipRepo.save(membership);
+    await membershipRepo.save(membership);
 
-    console.log(membership);
-
-    createSession(session);
     fs.mkdirSync(path.join(__dirname, "../../sessions/" + session.id + "/data"), { recursive: true });
+    createUserFiles(session.id, req["token"].username);
 
     res.status(200).json({ session: { id: session.id }});
 });
 
-let createSession = (session) => {
-    let nsp = io.of(session.id);
-    nsp.on("connection", socket => {
-        socket.on("lol", () => {
+router.post("/create-task", requireToken, async (req, res) => {
 
-        })
+    if(!req.body.sessionId) { return res.status(400).json({ "error": "Missing sessionId field" }); }
+    if(!req.body.task) { return res.status(400).json({ "error": "Missing task object" }); }
+    if(!req.body.task.cases) { return res.status(400).json({ "error": "Missing cases array in task object" }); }
 
-    })
-};
+    let session = await getRepository(Session).findOne(req.params.sessionId, {relations: ["tasks", "memberships", "memberships.user", "memberships.session"] });
+
+    if(!session) { return res.status(400).json({ "error": "Session doesn't exist"}) }
+
+    let membership = null;
+    for(let i = 0; i < session.memberships.length; ++i) {
+        if(session.memberships[i].user.username == req["token"].username && session.memberships[i].role == Role.OWNER) {
+            membership = session.memberships[i];
+            break;
+        }
+    }
+
+    if(!membership) { return res.status(403).json({ "error": "You are not authorized to add tasks to this session"}); }
+
+    let task = new Task();
+    task.session = session;
+    task.id = session.tasks.length + 1;
+    if(req.body.task.name) { task.name = req.body.task.name; }
+    if(req.body.task.description) { task.name = req.body.task.description; }
+    if(req.body.task.hints) { task.hints = req.body.task.hints; } else { task.hints = []; }
+
+    task = await getRepository(Task).save(task);
+    writeTest(session.id, task.id, req.body.task.cases);
+    res.sendStatus(200);
+});
+
+function createUserFiles(sessionId: string, username: string) {
+    if(!fs.existsSync(path.join(__dirname, "../../sessions/" + sessionId + "/data/" + username))) {
+        fs.mkdirSync(path.join(__dirname, "../../sessions/" + sessionId + "/data/" + username), { recursive: true });
+        fs.writeFileSync(path.join(__dirname, "../../sessions/" + sessionId + "/data/" + username + "/main.cpp"), "");
+        fs.writeFileSync(path.join(__dirname, "../../sessions/" + sessionId + "/data/" + username + "/compile_commands.json"), JSON.stringify([
+            {
+                directory: path.join(__dirname, "../../sessions/" + sessionId + "/data/" + username),
+                command: "clang++ --target=x86_64-w64-mingw32 -o main.exe main.cpp",
+                file: "main.cpp"
+            }
+        ], null, 4))
+    }
+}
+
+function writeTest(sessionId: string, taskId: number, cases) {
+    fs.mkdirSync(path.join(__dirname, "../../sessions/" + sessionId + "/tasks"), { recursive: true });
+    fs.writeFileSync(path.join(__dirname, "../../sessions/" + sessionId + "/tasks/task" + taskId + ".json"), JSON.stringify({
+        cases: cases
+    }, null, 4));
+}
 
 export { router }

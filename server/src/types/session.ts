@@ -1,5 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
 import { Membership } from "./membership";
+import { Task } from "./task";
+import { Grade } from "./grade";
 
 export enum Privacy {
     PUBLIC = "public",
@@ -33,5 +35,11 @@ export class Session {
 
     @OneToMany(() => Membership, membership => membership.session, { cascade: true, onDelete: "CASCADE"})
     memberships: Membership[];
+
+    @OneToMany(() => Task, task => task.session, { cascade: true, onDelete: "CASCADE"})
+    tasks: Task[];
+
+    @OneToMany(() => Grade, grade => grade.session, { cascade: true, onDelete: "CASCADE"})
+    grades: Grade[];
 
 }

@@ -4,6 +4,8 @@ import { createConnection } from "typeorm";
 import { User } from "./types/user";
 import { Session } from "./types/session";
 import { Membership } from "./types/membership";
+import { Task } from "./types/task";
+import { Grade } from "./types/grade";
 
 import express from "express";
 import bodyParser from "body-parser";
@@ -30,6 +32,9 @@ app.use("/users", userRouter);
 import { router as sessionRouter } from "./route/session";
 app.use("/sessions", sessionRouter);
 
+import { router as lspRouter } from "./route/lsp";
+app.use("/lsp", lspRouter);
+
 createConnection({
     type: "mysql",
     host: "localhost",
@@ -37,7 +42,7 @@ createConnection({
     username: process.env.MYSQL_USER,
     password: process.env.MYSQL_PASS,
     database: "open-colab",
-    entities: [ User, Session, Membership ],
+    entities: [ User, Session, Membership, Task, Grade ],
     synchronize: true
 }).then(()  => {
     http.listen(process.env.PORT || 4213, () => {

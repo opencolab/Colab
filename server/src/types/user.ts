@@ -1,5 +1,6 @@
 import { Entity, PrimaryColumn, Column, OneToMany } from "typeorm";
-import {Membership} from "./membership";
+import { Membership } from "./membership";
+import {Grade} from "./grade";
 
 @Entity()
 export class User {
@@ -21,5 +22,8 @@ export class User {
 
     @OneToMany(() => Membership, membership => membership.user, { cascade: true, onDelete: "CASCADE" })
     memberships: Membership[];
+
+    @OneToMany(() => Grade, grade => grade.user, { cascade: true, onDelete: "CASCADE"})
+    grades: Grade[];
 
 }
