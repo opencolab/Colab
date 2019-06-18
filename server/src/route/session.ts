@@ -49,6 +49,19 @@ router.get("/joined", requireToken, async (req, res) => {
     res.status(200).json({ sessions: sessions });
 });
 
+router.get("/invited", requireToken, async (req, res) => {
+    let userRepo = getRepository(User);
+    let user = await userRepo.findOne(req["token"].username, { relations: ["memberships", "memberships.session"] });
+    let sessions = user.memberships.filter(mship => mship.role == Role.PENDING).map(mship => {
+        return {
+            id: mship.session.id,
+            sname: mship.session.sname,
+            description: mship.session.description
+        }
+    });
+    res.status(200).json({ sessions: sessions });
+});
+
 router.post("/invite",  requireToken, async (req, res) => {
     let user = await getRepository(User).findOne(req.body.username);
     let session = await getRepository(Session).findOne(req.body.session, { relations: ["memberships, memberships.user, memberships.session"]});
