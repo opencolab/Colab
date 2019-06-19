@@ -191,6 +191,26 @@ router.post("/create-task", requireToken, async (req, res) => {
     res.sendStatus(200);
 });
 
+router.post("/:sessionId/set-permission",  requireToken, async (req, res) => {
+    let session = await getRepository(Session).findOne(req.params.sessionId, {relations: ["memberships", "memberships.user", "memberships.session"] });
+    let user = await getRepository(User).findOne(req.params.username);
+
+    if(!session) { return res.status(400).json({ "error": "Session doesn't exist"}); }
+    if(!user) { return res.status(400).json({ "error": "User doesn't exist"}); }
+    if(!req.params.role) { return res.status(400).json({ "error": "Missing role field"}); }
+    if(getSessionOwner(session) != req["token"].username) { return res.status(403).json({ "error": "You aren't allowed to set permissions"}); }
+
+
+
+    let membership = new Membership();
+    membership.session = session;
+    membership.user = user;
+    membership.role = req.params.role;
+    await getRepository(Membership).save(membership);
+
+    res.sendStatus(200);
+});
+
 router.get("/:sessionId/grades",  requireToken, async (req, res) => {
     let session = await getRepository(Session).findOne(req.params.sessionId, {relations: ["memberships", "memberships.user", "memberships.session"] });
     let gradesRepo = getRepository(Grade);
