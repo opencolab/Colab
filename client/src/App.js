@@ -2,15 +2,17 @@ import React, {Component} from 'react';
 
 import {BrowserRouter, Route, Switch} from "react-router-dom";
 
+import Header from "./components/header/Header";
+
 import Home from "./components/home/Home";
 import Error from "./components/error/Error";
 
-import Authenticate from "./components/authentication/Authenticate";
-
 import Dashboard from "./components/dashboard/Dashboard";
-import Session from "./components/session/Session";
-import Header from "./components/header/Header";
 import UserProfile from "./components/profile/UserProfile";
+import MySessions from "./components/session/MySessions";
+import Notifications from "./components/session/Notifications";
+import Session from "./components/session/Session";
+
 
 class App extends Component {
     render() {
@@ -23,7 +25,9 @@ class App extends Component {
                         <Route path="/error" component={Error}/>
                         <Route path="/dashboard" component={Dashboard}/>
                         <Route path="/profile" component={UserProfile}/>
-                        <Route path="/session" component={Authenticate(Session)}/>
+                        <Route path="/mysessions" component={MySessions}/>
+                        <Route path="/notifications" component={Notifications}/>
+                        <Route path="/session" component={Session}/>
                     </Switch>
                 </div>
             </BrowserRouter>

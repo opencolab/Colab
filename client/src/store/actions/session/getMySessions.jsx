@@ -3,11 +3,14 @@ import axios from "axios";
 import {GET_MY_SESSIONS} from "../../data/mapping/api";
 import {MY_SESSIONS_RETRIEVED} from "../../data/mapping/session";
 
-export const getMySessions = () => {
+export const getMySessions = (callback) => {
     return (dispatch) => {
         axios.get(GET_MY_SESSIONS, {headers: {'Authorization': "bearer " + localStorage.getItem('user')}})
-            .then((res) => dispatch({type: MY_SESSIONS_RETRIEVED, payload: res.data.sessions}))
-            .catch(() => console.log("my sessions error"))
+
+        // REVIEW: Unresolved variable sessions
+        .then((res) => dispatch({type: MY_SESSIONS_RETRIEVED, payload: res.data.sessions}))
+        .then(()=> callback())
+        .catch(() => console.log("my sessions error"))
     };
 
 };

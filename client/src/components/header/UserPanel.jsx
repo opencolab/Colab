@@ -10,11 +10,15 @@ import SessionCreationForm from "../session/SessionCreationForm";
 import {signOut} from "../../store/actions/authentication/signOut";
 
 import {USERNAME} from "../../store/data/mapping/user";
-import {USER_PROFILE_URL} from "../../store/data/mapping/url";
+import {MY_SESSIONS_URL, USER_PROFILE_URL} from "../../store/data/mapping/url";
 import {GET_PROFILE_PIC} from "../../store/data/mapping/api";
 import {OPEN_FORM, SESSION_CREATION_FORM} from "../../store/data/mapping/form";
 
 class UserPanel extends Component {
+    mySessions = ()=>{
+        this.props.history.push(MY_SESSIONS_URL);
+    };
+
     logOut = () => {
         this.props.signOut(this.props.history);
     };
@@ -41,6 +45,11 @@ class UserPanel extends Component {
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu>
+                    <Dropdown.Item as="button" onClick={this.mySessions}>
+                        <MDBIcon icon="th-list" />
+                        {" My Sessions"}
+                    </Dropdown.Item>
+
                     <Dropdown.Item as="button" onClick={this.props.openSessionCreator}>
                         <MDBIcon icon="plus"/>
                         {" New Session"}

@@ -6,6 +6,7 @@ export const SESSION = "session";
 export const PUBLIC_SESSIONS = "public sessions";
 export const MY_SESSIONS = "my sessions";
 
+export const SESSION_ID = "id";
 export const SESSION_NAME = "sname";
 export const SESSION_HIDDEN = "hidden";
 export const SESSION_DESCRIPTION = "description";

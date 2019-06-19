@@ -107,17 +107,7 @@ class Session extends Component {
                     onHide={this.closeTask}
                 />
 
-                <Row style={
-                    {
-                        position: "fixed",
-                        width: "100%",
-                        height: "82%",
-                        marginTop: 30,
-                        marginLeft: 0,
-                        backgroundColor: "#232937"
-                    }
-                }
-                >
+                <div className={"wrapper"}>
                     <SessionPanel items={this.items}/>
 
                     <SessionLayout
@@ -125,7 +115,7 @@ class Session extends Component {
                         taskButtonValue={"Task"}
                         rooms={["Master", "Mourad"]}
                     />
-                </Row>
+                </div>
             </div>
         );
     }
