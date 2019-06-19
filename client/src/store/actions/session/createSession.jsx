@@ -1,0 +1,18 @@
+import axios from "axios";
+
+import {CREATE_SESSION} from "../../data/mapping/api";
+import {SESSION_CREATED} from "../../data/mapping/session";
+
+export const createSession = (session, callback) => {
+    return (dispatch) => {
+        axios.post(
+            CREATE_SESSION,
+            {session: session},
+            {headers: {'Authorization': "bearer " + localStorage.getItem('user')}}
+        )
+            .then((res) => dispatch({type: SESSION_CREATED, payload: res.data.session}))
+            .then(() => callback())
+            .catch(() => console.log("creation error"));
+    };
+
+};
