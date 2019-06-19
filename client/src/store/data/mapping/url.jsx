@@ -1,3 +1,3 @@
+export const HOME_URL = "/";
 export const DASHBOARD = "/dashboard";
-export const HOME = "/";
 export const USER_PROFILE = "/profile";

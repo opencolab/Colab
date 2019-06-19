@@ -2,15 +2,13 @@ import React, {Component} from 'react';
 
 import {Alert, Button} from "react-bootstrap";
 
+import {HOME_URL} from "../../store/data/mapping/url";
+
 class Error extends Component {
-    goBack = () => {
 
-        // BUG
-        // -2 is to bypass the page that caused the error
-        this.props.history.go(-2);
-
-        // console.log(this.props);
-    };
+    goToHomePage = () => {
+        this.props.history.push(HOME_URL);
+     };
 
     render() {
         return (
@@ -31,8 +29,8 @@ class Error extends Component {
                     <hr/>
 
                     <div className="d-flex justify-content-end">
-                        <Button onClick={this.goBack} variant="outline-success">
-                            Previous Page
+                        <Button onClick={this.goToHomePage} variant="outline-success">
+                            Home Page
                         </Button>
                     </div>
                 </Alert>
