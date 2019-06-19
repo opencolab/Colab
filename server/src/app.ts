@@ -35,6 +35,8 @@ app.use("/sessions", sessionRouter);
 import { router as lspRouter } from "./route/lsp";
 app.use("/lsp", lspRouter);
 
+import "./route/sockets";
+
 createConnection({
     type: "mysql",
     host: "localhost",

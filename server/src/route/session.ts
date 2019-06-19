@@ -1,35 +1,16 @@
 import express from "express";
-import {getRepository} from "typeorm";
-import {io} from "../app";
-import jwt from "jsonwebtoken";
-import {requireToken} from "./auth";
-import {Privacy, Session} from "../types/session";
+import { getRepository } from "typeorm";
+import { requireToken} from "./auth";
+import { Privacy, Session} from "../types/session";
 import fs from "fs";
 import path from "path";
-import {Membership, Role} from "../types/membership";
-import {User} from "../types/user";
-import {Task} from "../types/task";
-import {Grade} from "../types/grade";
+import { Membership, Role } from "../types/membership";
+import { User } from "../types/user";
+import { Task } from "../types/task";
+import { Grade } from "../types/grade";
+import { createNamespace } from "./sockets";
 
 let router = express.Router();
-
-io.use((socket, next) => {
-    if(socket.handshake.query && socket.handshake.query.token) {
-        jwt.verify(socket.handshake.query.token, process.env.JWT_KEY, (err, decoded) => {
-            if(err) return next(new Error('Authentication error'));
-            socket["token"] = decoded;
-            next();
-        });
-    } else { next(new Error()); }
-});
-
-io.on("connection", socket => {
-
-    socket.on("disconnect", () => {
-
-    });
-
-});
 
 router.get("/", requireToken, async (req, res) => {
     let sessionRepo = getRepository(Session);
@@ -92,7 +73,6 @@ router.post("/invite",  requireToken, async (req, res) => {
 });
 
 router.get("/join/:sessionId",  requireToken, async (req, res) => {
-
     let session = await getRepository(Session).findOne(req.params.sessionId, {relations: ["memberships", "memberships.user", "memberships.session"] });
     let membershipRepo = getRepository(Membership);
     let membership = null;
@@ -129,6 +109,7 @@ router.get("/join/:sessionId",  requireToken, async (req, res) => {
             break;
     }
     createUserFiles(session.id, req["token"].username);
+    createNamespace("/" + session.id);
 });
 
 router.post("/create-session", requireToken, async (req, res) => {
