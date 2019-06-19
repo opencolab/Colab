@@ -54,7 +54,7 @@ router.get("/joined", requireToken, async (req, res) => {
 router.get("/invited", requireToken, async (req, res) => {
     let userRepo = getRepository(User);
     let user = await userRepo.findOne(req["token"].username, { relations: ["memberships", "memberships.session"] });
-    let sessions = user.memberships.filter(mship => mship.role == Role.PENDING).map(mship => {
+    let sessions = user.memberships.filter(mship => mship.role == Role.PENDING && mship.role in Role).map(mship => {
         return {
             id: mship.session.id,
             sname: mship.session.sname,
@@ -94,6 +94,8 @@ router.get("/join/:sessionId",  requireToken, async (req, res) => {
     let session = await getRepository(Session).findOne(req.params.sessionId, {relations: ["memberships", "memberships.user", "memberships.session"] });
     let membershipRepo = getRepository(Membership);
     let membership = null;
+
+    if(!session) { return res.status(400).json({ "error": "Session doesn't exist"}); }
 
     for(let i = 0; i < session.memberships.length; ++i) {
         if(session.memberships[i].user.username == req["token"].username) {
