@@ -63,4 +63,15 @@ router.get("/profile/:username", async (req, res) => {
     }
 });
 
+router.get("/", async (req, res) => {
+    let userRepo = getRepository(User);
+
+    let user = await userRepo.findOne(req.params.username, { select: ["username"] });
+    if(user) {
+        res.status(200).json({ user: user })
+    } else {
+        res.status(404).json({error: "User does not exist"})
+    }
+});
+
 export { router }

@@ -41,26 +41,28 @@ router.get("/", requireToken, async (req, res) => {
 router.get("/joined", requireToken, async (req, res) => {
     let userRepo = getRepository(User);
     let user = await userRepo.findOne(req["token"].username, { relations: ["memberships", "memberships.session"] });
-    let sessions = user.memberships.filter(mship => mship.role != Role.PENDING).map(mship => {
+    let sessions = user.memberships.filter(mship => mship.role !== Role.PENDING && mship.role != null).map(mship => {
         return {
             id: mship.session.id,
             sname: mship.session.sname,
             description: mship.session.description
         }
     });
+    for(let i = 0; i < sessions.length; ++i) { sessions[i]["owner"] = await getSessionOwner(sessions[i]["id"]); }
     res.status(200).json({ sessions: sessions });
 });
 
 router.get("/invited", requireToken, async (req, res) => {
     let userRepo = getRepository(User);
-    let user = await userRepo.findOne(req["token"].username, { relations: ["memberships", "memberships.session"] });
-    let sessions = user.memberships.filter(mship => mship.role == Role.PENDING && mship.role in Role).map(mship => {
+    let user = await userRepo.findOne(req["token"].username, { relations: ["memberships", "memberships.session", "memberships.user"] });
+    let sessions = user.memberships.filter(mship => mship.role === Role.PENDING && mship.role != null).map(async (mship) => {
         return {
             id: mship.session.id,
             sname: mship.session.sname,
             description: mship.session.description
         }
     });
+    for(let i = 0; i < sessions.length; ++i) { sessions[i]["owner"] = await getSessionOwner(sessions[i]["id"]); }
     res.status(200).json({ sessions: sessions });
 });
 
@@ -210,6 +212,11 @@ router.get("/:sessionId/grades",  requireToken, async (req, res) => {
 
     res.status(200).json({ grades: grades });
 });
+
+async function getSessionOwner(sessionId) {
+    let session = await getRepository(Session).findOne(sessionId, { relations: ["memberships", "memberships.user"] });
+    return await session.memberships.filter(mship => mship.role === Role.OWNER)[0].user.username;
+}
 
 function createUserFiles(sessionId: string, username: string) {
     if(!fs.existsSync(path.join(__dirname, "../../sessions/" + sessionId + "/data/" + username))) {
