@@ -9,25 +9,24 @@ import {getPublicSessions} from "../../store/actions/session/getPublicSessions";
 
 import {PUBLIC_SESSIONS} from "../../store/data/mapping/session";
 
-
 class Dashboard extends Component {
     componentWillMount() {
         this.props.getSessions();
     }
 
     render() {
-        return !this.props[PUBLIC_SESSIONS]
-            ?
-            <div>
-                Loading...
-            </div>
-            :
-            <CardColumns>
-                {this.props[PUBLIC_SESSIONS].map((session) => <DashboardCard session={session}/>)}
-            </CardColumns>
+        if (!this.props[PUBLIC_SESSIONS]) {
+            return <h2> Loading... </h2>;
+        }
+        else {
+            return (<CardColumns> {
+                    this.props[PUBLIC_SESSIONS].map((session) => <DashboardCard session={session}/>)
+                }
+                </CardColumns>
+            );
+        }
     };
 }
-
 
 const mapStateToProps = (combineReducers) => {
     return {[PUBLIC_SESSIONS]: combineReducers.sessionStorage[PUBLIC_SESSIONS]}
