@@ -11,7 +11,7 @@ import {
     PROFILE_UPDATED
 } from "../../data/mapping/user";
 
-import {DASHBOARD} from "../../data/mapping/url";
+import {DASHBOARD_URL} from "../../data/mapping/url";
 import {UPDATE_PROFILE} from "../../data/mapping/api";
 
 export const updateProfile = (profile, history) => {
@@ -27,7 +27,7 @@ export const updateProfile = (profile, history) => {
 
         axios.post(UPDATE_PROFILE, data, {headers: {'Authorization': "bearer " + localStorage.getItem('user')}})
             .then(() => dispatch({type: PROFILE_UPDATED}))
-            .then(() => history.push(DASHBOARD))
+            .then(() => history.push(DASHBOARD_URL))
             .catch((error) => {
                     dispatch({type: PROFILE_UPDATE_ERROR, payload: error.response.data.auth})
                 }

@@ -6,7 +6,7 @@ import {withRouter} from "react-router-dom";
 
 import {signUp} from "../../store/actions/authentication/signUp";
 
-import {DASHBOARD} from "../../store/data/mapping/url";
+import {DASHBOARD_URL} from "../../store/data/mapping/url";
 import {EMAIL, PASSWORD, USERNAME} from "../../store/data/mapping/user";
 import {CLEAR_SIGN_UP_ERROR, REGISTRATION_ERROR} from "../../store/data/mapping/authentication";
 import {CLOSE_FORM, SIGN_UP_FORM} from "../../store/data/mapping/form";
@@ -29,7 +29,7 @@ class SignUp extends Component {
             if (this.state[USERNAME] && this.state[EMAIL] && this.state[PASSWORD]) {
                 this.props.signUp(this.state, () => {
                     this.props.closeSignUp();
-                    this.props.history.push(DASHBOARD);
+                    this.props.history.push(DASHBOARD_URL);
                 });
             }
         }
@@ -42,7 +42,7 @@ class SignUp extends Component {
 
     render() {
         if (this.props.authenticated) {
-            this.props.history.push(DASHBOARD);
+            this.props.history.push(DASHBOARD_URL);
         } else return (
             <Modal
                 {...this.props}

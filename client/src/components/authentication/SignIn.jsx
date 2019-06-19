@@ -7,7 +7,7 @@ import {withRouter} from "react-router-dom";
 import {signIn} from "../../store/actions/authentication/signIn"
 
 import {PASSWORD, USERNAME} from "../../store/data/mapping/user";
-import {DASHBOARD} from "../../store/data/mapping/url";
+import {DASHBOARD_URL} from "../../store/data/mapping/url";
 import {AUTHENTICATION_ERROR, CLEAR_SIGN_IN_ERROR} from "../../store/data/mapping/authentication";
 import {CLOSE_FORM, SIGN_IN_FORM} from "../../store/data/mapping/form";
 
@@ -32,14 +32,14 @@ class SignIn extends Component {
             e.preventDefault();
             this.props.signIn(this.state, () => {
                 this.props.closeSignIn();
-                this.props.history.push(DASHBOARD);
+                this.props.history.push(DASHBOARD_URL);
             });
         }
     };
 
     render() {
         if (this.props.authenticated) {
-            this.props.history.push(DASHBOARD);
+            this.props.history.push(DASHBOARD_URL);
         } else return (
             <Modal
                 {...this.props}

@@ -10,7 +10,7 @@ import SessionCreationForm from "../session/SessionCreationForm";
 import {signOut} from "../../store/actions/authentication/signOut";
 
 import {USERNAME} from "../../store/data/mapping/user";
-import {USER_PROFILE} from "../../store/data/mapping/url";
+import {USER_PROFILE_URL} from "../../store/data/mapping/url";
 import {GET_PROFILE_PIC} from "../../store/data/mapping/api";
 import {OPEN_FORM, SESSION_CREATION_FORM} from "../../store/data/mapping/form";
 
@@ -20,7 +20,7 @@ class UserPanel extends Component {
     };
 
     profile = () => {
-        this.props.history.push(USER_PROFILE);
+        this.props.history.push(USER_PROFILE_URL);
     };
 
     render() {

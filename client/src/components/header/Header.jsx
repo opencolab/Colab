@@ -11,7 +11,7 @@ import SearchBar from "./SearchBar";
 import UserPanel from "./UserPanel";
 
 
-import {DASHBOARD, HOME} from "../../store/data/mapping/url";
+import {DASHBOARD_URL, HOME} from "../../store/data/mapping/url";
 import {OPEN_FORM, SIGN_IN_FORM, SIGN_UP_FORM} from "../../store/data/mapping/form";
 
 class Header extends Component {
@@ -64,7 +64,7 @@ class Header extends Component {
                         </Nav.Item>
 
                         <Nav.Item>
-                            <NavLink style={{color: "white"}} className={"nav-link"} to={DASHBOARD}>
+                            <NavLink style={{color: "white"}} className={"nav-link"} to={DASHBOARD_URL}>
                                 Dashboard
                             </NavLink>
                         </Nav.Item>
