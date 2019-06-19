@@ -9,6 +9,7 @@ import path from "path";
 import {Membership, Role} from "../types/membership";
 import {User} from "../types/user";
 import {Task} from "../types/task";
+import {Grade} from "../types/grade";
 
 let router = express.Router();
 
@@ -156,7 +157,6 @@ router.post("/create-session", requireToken, async (req, res) => {
 });
 
 router.post("/create-task", requireToken, async (req, res) => {
-
     if(!req.body.sessionId) { return res.status(400).json({ "error": "Missing sessionId field" }); }
     if(!req.body.task) { return res.status(400).json({ "error": "Missing task object" }); }
     if(!req.body.task.cases) { return res.status(400).json({ "error": "Missing cases array in task object" }); }
@@ -185,6 +185,28 @@ router.post("/create-task", requireToken, async (req, res) => {
     task = await getRepository(Task).save(task);
     writeTest(session.id, task.id, req.body.task.cases);
     res.sendStatus(200);
+});
+
+router.get("/:sessionId/grades",  requireToken, async (req, res) => {
+    let session = await getRepository(Session).findOne(req.params.sessionId, {relations: ["memberships", "memberships.user", "memberships.session"] });
+    let gradesRepo = getRepository(Grade);
+
+    if(!session) { return res.status(400).json({ "error": "Session doesn't exist"}); }
+
+    let findOptions = { where: {}, relations: ["user", "task"] };
+    if(req.query.username) { findOptions.where["user"] = req.query.username; }
+    if(req.query.task) { findOptions.where["task"] = req.query.task; }
+
+    let grades = (await gradesRepo.find(findOptions)).map(grade => {
+        return {
+            user: grade.user.username,
+            task: grade.task,
+            correct: grade.correct,
+            wrong: grade.wrong
+        }
+    });
+
+    res.status(200).json({ grades: grades });
 });
 
 function createUserFiles(sessionId: string, username: string) {
