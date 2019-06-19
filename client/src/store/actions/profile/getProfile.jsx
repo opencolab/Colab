@@ -13,6 +13,7 @@ export const getProfile = () => {
                 };
                 dispatch({type: PROFILE_RETRIEVED, payload: user});
             })
+            .then(() => { callback() })
             .catch((error) => {
                     dispatch({type: PROFILE_RETRIEVAL_ERROR, payload: error.response.data.auth})
                 }

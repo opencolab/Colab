@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 
-import {Alert, Form} from "react-bootstrap";
+import {Form} from "react-bootstrap";
 import {connect} from "react-redux";
 
 import ProfileImage from "./ProfileImage";
@@ -9,32 +9,35 @@ import ProfileInfo from "./ProfileInfo";
 import {getProfile} from "../../store/actions/profile/getProfile";
 import {updateProfile} from "../../store/actions/profile/updateProfile";
 
+import Authenticate from "../authentication/Authenticate";
+
 class UserProfile extends Component {
-    state = {validated: false};
+    state = {validated: false, loaded: false};
 
     componentWillMount() {
-        this.props.getProfile();
+        this.props.getProfile(() => {
+                this.setState({loaded:true})
+            }
+        );
+    }
+
+    componentWillUnmount() {
+        this.setState({loaded: false})
     }
 
     saveChanges = (e) => {
+        e.preventDefault();
         if (e.currentTarget.checkValidity()) {
-            e.preventDefault();
             this.props.updateProfile(this.props.user, this.props.history);
         }
-        e.preventDefault();
         this.setState({validated: true});
     };
 
     render() {
         if (!this.props.user) {
-            return (
-                <Alert variant="success">
-                    <Alert.Heading>
-                        Loading...
-                    </Alert.Heading>
-                </Alert>
-            )
-        } else {
+            return <h2>Loading...</h2>;
+        }
+        else {
             return (
                 <Form
                     id={"profile_form"}
@@ -61,4 +64,4 @@ const mapDispatchToProps = (dispatch) => {
     }
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(UserProfile);
+export default connect(mapStateToProps, mapDispatchToProps)(Authenticate(UserProfile));
