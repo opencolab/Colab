@@ -1,5 +1,5 @@
 import express from "express";
-import { getRepository } from "typeorm";
+import {getRepository, Like} from "typeorm";
 import { User } from "../types/user";
 import path from "path";
 import fs from "fs";
@@ -64,14 +64,9 @@ router.get("/profile/:username", async (req, res) => {
 });
 
 router.get("/", async (req, res) => {
-    let userRepo = getRepository(User);
-
-    let user = await userRepo.findOne(req.params.username, { select: ["username"] });
-    if(user) {
-        res.status(200).json({ user: user })
-    } else {
-        res.status(404).json({error: "User does not exist"})
-    }
+    let users = await getRepository(User).find({ select: ["username", "email", "fname", "lname"]});
+    if(req.query.username) { users = users.filter(user => user.username.includes(req.query.username)); }
+    res.status(200).json({ users: users });
 });
 
 export { router }
