@@ -7,14 +7,12 @@ import SessionPanel from "./SessionPanel";
 
 import TaskForm from "../TaskForm";
 
-import python from "../session/python.jpg";
-
 class Session extends Component {
     state = {taskShow: false};
 
     items = [
         {
-            img: python, username: "Tab 1",
+            img: process.env.PUBLIC_URL + "/tac.jpg", username: "Tab 1",
             permissions: [
                 {name: "permission1", value: true},
                 {name: "permission2", value: false},
@@ -23,7 +21,7 @@ class Session extends Component {
             ]
         },
         {
-            img: python, username: "Tab 1",
+            img: process.env.PUBLIC_URL + "/tac.jpg", username: "Tab 1",
             permissions: [
                 {name: "permission1", value: true},
                 {name: "permission2", value: false},
@@ -32,7 +30,7 @@ class Session extends Component {
             ]
         },
         {
-            img: python, username: "Tab 1",
+            img: process.env.PUBLIC_URL + "/tac.jpg", username: "Tab 1",
             permissions: [
                 {name: "permission1", value: true},
                 {name: "permission2", value: false},
@@ -41,7 +39,7 @@ class Session extends Component {
             ]
         },
         {
-            img: python, username: "Tab 1",
+            img: process.env.PUBLIC_URL + "/tac.jpg", username: "Tab 1",
             permissions: [
                 {name: "permission1", value: true},
                 {name: "permission2", value: false},
@@ -50,7 +48,7 @@ class Session extends Component {
             ]
         },
         {
-            img: python, username: "Tab 1",
+            img: process.env.PUBLIC_URL + "/tac.jpg", username: "Tab 1",
             permissions: [
                 {name: "permission1", value: true},
                 {name: "permission2", value: false},
@@ -59,7 +57,7 @@ class Session extends Component {
             ]
         },
         {
-            img: python, username: "Tab 2",
+            img: process.env.PUBLIC_URL + "/tac.jpg", username: "Tab 2",
             permissions: [
                 {name: "permission1", value: true},
                 {name: "permission2", value: false},
@@ -68,7 +66,7 @@ class Session extends Component {
             ]
         },
         {
-            img: python, username: "Tab 3",
+            img: process.env.PUBLIC_URL + "/tac.jpg", username: "Tab 3",
             permissions: [
                 {name: "permission1", value: false},
                 {name: "permission2", value: false},
@@ -77,7 +75,7 @@ class Session extends Component {
             ]
         },
         {
-            img: python, username: "Tab 4",
+            img: process.env.PUBLIC_URL + "/tac.jpg", username: "Tab 4",
             permissions: [
                 {name: "permission1", value: true},
                 {name: "permission2", value: false},
@@ -86,7 +84,7 @@ class Session extends Component {
             ]
         },
         {
-            img: python, username: "Tab 5",
+            img: process.env.PUBLIC_URL + "/tac.jpg", username: "Tab 5",
             permissions: [
                 {name: "permission1", value: true},
                 {name: "permission2", value: true},

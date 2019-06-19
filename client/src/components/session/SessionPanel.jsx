@@ -1,11 +1,13 @@
 import React, {Component} from 'react';
 
-import {Button, ButtonToolbar, OverlayTrigger, Tab, Tabs, Tooltip} from 'react-bootstrap';
+import {Tabs, Tab, Button, ButtonToolbar, OverlayTrigger, Tooltip, Form, Col} from 'react-bootstrap';
 import {MDBIcon} from "mdbreact";
 
 import {ContextMenuComponent, TreeViewComponent} from "@syncfusion/ej2-react-navigations";
 import {CheckBoxComponent} from '@syncfusion/ej2-react-buttons';
 import {enableRipple} from '@syncfusion/ej2-base';
+
+import {SESSION_HIDDEN} from "../../store/dataMapping/session";
 
 enableRipple(true);
 
@@ -200,52 +202,54 @@ class SessionPanel extends Component {
 
     render() {
         return (
-            <div className={"sessionPanel"}>
-                <Tabs style={{width: "100%"}} id="controlled-tab-example">
-                    <Tab eventKey="files" title="Files">
-                        <ButtonToolbar>
-                            {
-                                this.icons.map(placement => (
-                                        <OverlayTrigger key={placement.id} placement={placement.id}
-                                                        overlay={
-                                                            <Tooltip
-                                                                id={`tooltip-${placement.id}`}> {placement.id}
-                                                            </Tooltip>
-                                                        }
-                                        >
-                                            <Button variant={"link"}>
-                                                <MDBIcon id={placement.id}
-                                                         icon={placement.icon}
-                                                         className={"icons"}
-                                                />
-                                            </Button>
-                                        </OverlayTrigger>
+            <Col xs={3}>
+                <div className={"sessionPanel"}>
+                    <Tabs style={{width: "100%"}} id="controlled-tab-example">
+                        <Tab eventKey="files" title="Files">
+                            <ButtonToolbar>
+                                {
+                                    this.icons.map(placement => (
+                                            <OverlayTrigger key={placement.id} placement={placement.id}
+                                                            overlay={
+                                                                <Tooltip
+                                                                    id={`tooltip-${placement.id}`}> {placement.id}
+                                                                </Tooltip>
+                                                            }
+                                            >
+                                                <Button variant={"link"}>
+                                                    <MDBIcon id={placement.id}
+                                                             icon={placement.icon}
+                                                             className={"icons"}
+                                                    />
+                                                </Button>
+                                            </OverlayTrigger>
+                                        )
                                     )
-                                )
-                            }
-                        </ButtonToolbar>
+                                }
+                            </ButtonToolbar>
 
-                        <TreeViewComponent
-                            id={'target'}
-                            fields={this.filesFields}
-                            allowEditing={true}
-                            allowMultiSelection={true}
-                            allowDragAndDrop={true}
-                            style={{color: "white"}}
-                        />
+                            <TreeViewComponent
+                                id={'target'}
+                                fields={this.filesFields}
+                                allowEditing={true}
+                                allowMultiSelection={true}
+                                allowDragAndDrop={true}
+                                style={{color: "white"}}
+                            />
 
-                        <ContextMenuComponent target="#target" items={this.MenuItemModel}/>
-                    </Tab>
+                            <ContextMenuComponent target="#target" items={this.MenuItemModel}/>
+                        </Tab>
 
-                    <Tab eventKey="users" title="Users">
-                        <TreeViewComponent
-                            fields={this.usersFields}
-                            nodeTemplate={this.nodeTemplate}
-                            cssClass={'custom'}
-                        />
-                    </Tab>
-                </Tabs>
-            </div>
+                        <Tab eventKey="users" title="Users">
+                            <TreeViewComponent
+                                fields={this.usersFields}
+                                nodeTemplate={this.nodeTemplate}
+                                cssClass={'custom'}
+                            />
+                        </Tab>
+                    </Tabs>
+                </div>
+            </Col>
         );
     }
 }

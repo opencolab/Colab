@@ -4,6 +4,11 @@ import {Col} from "react-bootstrap";
 import Form from "react-bootstrap/Form";
 import Draggable from 'react-draggable';
 
+import AceEditor from 'react-ace';
+
+import 'brace/mode/java';
+import 'brace/theme/github';
+
 import '../../css/index.css';
 
 class SessionLayout extends Component {
@@ -51,13 +56,17 @@ class SessionLayout extends Component {
         // REVIEW: The usage of rooms in here is ?
         const {rooms} = this.state;
         return (
-            <Col style={{position: "fixed", width: 600}}>
-                <div className={"wrapper"}>
-                    <div style={{height: this.state.CodeSectionHeight + "%"}}>
-                        <Form.Control
-                            as={"textarea"}
-                            style={{resize: "none", height: "100%", borderRadius: 5}}
-                            placeholder={"Write your Code ..."}
+            <Col xs={9}>
+                <div className={"codingSection"}>
+                    <div className={"content"} style={{height:this.state.CodeSectionHeight+"%"}}>
+                        <AceEditor
+                            fontSize={"16px"}
+                            mode="java"
+                            width={"100%"}
+                            height={"100%"}
+                            theme="github"
+                            name="UNIQUE_ID_OF_DIV"
+                            editorProps={{$blockScrolling: true}}
                         />
                     </div>
 
@@ -73,16 +82,12 @@ class SessionLayout extends Component {
                     <div className={"content"} style={{height: this.state.OutputSectionHeight + "%"}}>
                         <Form.Control
                             as={"textarea"}
-                            style={{resize: "none", height: "100%", borderRadius: 5}}
+                            style={{resize: "none", height:"100%", borderRadius: 0}}
                             placeholder={"Output Section ..."}
-
-                            // REVIEW: Commented code was removed from here
                         />
                     </div>
                 </div>
             </Col>
-
-            // REVIEW: Commented code was removed from here
         );
     }
 }

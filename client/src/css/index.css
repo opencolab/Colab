@@ -2,6 +2,7 @@
 @import "profile.css";
 @import "usersTab.css";
 @import "error.css";
+@import "session.css";
 
 @import "./ej2/ej2-base-material.css";
 @import "./ej2/ej2-buttons-material.css";
@@ -42,36 +43,6 @@ small {
 
 /* REVIEW: Commented code was removed from here */
 
-.wrapper {
-    margin-left: 258px;
-    height: 520px;
-    width: 80%;
-    position: fixed;
-    max-height: 520px;
-    border: 3px solid #232960;
-    border-radius: 6px;
-}
-
-.handle {
-    background-color: #232937;
-    height: 5px;
-    cursor: row-resize;
-}
-
-.content {
-    position: absolute;
-    height: 100%;
-    width: 100%;
-}
-
-
-.textareaLayout {
-    height: 100%;
-    resize: none;
-}
-
-/* REVIEW: Commented code was removed from here */
-
 .dropdown-toggle.btn.btn-primary::after {
     vertical-align: 0;
 }
@@ -79,11 +50,9 @@ small {
 /* REVIEW: Commented code was removed from here */
 
 .sessionPanel {
-    width: 20%;
-    /*margin-left: 15px;*/
     background-color: white;
-    max-height: 520px;
-    height: 520px;
+    max-height: 80%;
+    height: 100%;
     color: black;
 }
 
