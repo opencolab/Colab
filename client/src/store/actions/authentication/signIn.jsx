@@ -3,7 +3,7 @@ import axios from "axios/index";
 import {USERNAME} from "../../data/mapping/user";
 import {SIGN_IN} from "../../data/mapping/api";
 import {AUTHENTICATED, AUTHENTICATION_ERROR} from "../../data/mapping/authentication";
-import {CONNECT_SOCKET} from "../../data/mapping/socket";
+import {CONNECT_TO_DEFAULT_SOCKET} from "../../data/mapping/socket";
 
 export const signIn = (signInData, callback) => {
     return (dispatch) => {
@@ -12,7 +12,7 @@ export const signIn = (signInData, callback) => {
                 localStorage.setItem(USERNAME, signInData.username);
                 localStorage.setItem('user', res.data.token);
                 dispatch({type: AUTHENTICATED});
-                dispatch({type: CONNECT_SOCKET})
+                dispatch({type: CONNECT_TO_DEFAULT_SOCKET})
             })
             .then(() => {
                     callback();

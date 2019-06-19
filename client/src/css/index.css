@@ -3,6 +3,7 @@
 @import "usersTab.css";
 @import "error.css";
 @import "session.css";
+@import "select.css";
 
 @import "./ej2/ej2-base-material.css";
 @import "./ej2/ej2-buttons-material.css";
@@ -15,6 +16,11 @@
 @import "./ej2/ej2-react-filemanager-material.css";
 @import "./ej2/ej2-react-navigations-material.css";
 @import "./ej2/ej2-splitbuttons-material.css";
+
+html{
+    height: 100%;
+    width: 100%;
+}
 
 body {
     margin: 0;
@@ -53,13 +59,6 @@ small {
 }
 
 /* REVIEW: Commented code was removed from here */
-
-.sessionPanel {
-    background-color: white;
-    max-height: 80%;
-    height: 100%;
-    color: black;
-}
 
 .navItem:hover {
     background-color: #0f131b;

@@ -3,7 +3,9 @@ import React, { Component } from 'react';
 import { Card } from 'react-bootstrap';
 import Button from "react-bootstrap/Button";
 
-import { SESSION_DESCRIPTION, SESSION_NAME } from "../../store/data/mapping/session";
+import {SESSION_DESCRIPTION, SESSION_ID, SESSION_NAME} from "../../store/data/mapping/session";
+
+import {JOIN_SESSION} from "../../store/data/mapping/api";
 
 class DashboardCard extends Component{
     state = { collapse: false };
@@ -31,9 +33,10 @@ class DashboardCard extends Component{
                             { this.props.session[SESSION_DESCRIPTION] }
                         </Card.Text>
 
-                        <Button>
+                        <Button href={JOIN_SESSION + this.props.session[SESSION_ID]}>
                             Join
                         </Button>
+
                     </div>
                 </Card.Body>
             </Card>

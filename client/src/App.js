@@ -27,7 +27,7 @@ class App extends Component {
                         <Route path="/profile" component={UserProfile}/>
                         <Route path="/mysessions" component={MySessions}/>
                         <Route path="/notifications" component={Notifications}/>
-                        <Route path="/session" component={Session}/>
+                        <Route path="/sessions/join/:sessionId" component={Session}/>
                     </Switch>
                 </div>
             </BrowserRouter>
