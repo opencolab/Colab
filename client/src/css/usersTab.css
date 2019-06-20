@@ -1,0 +1,52 @@
+#loader {
+    color: #008cff;
+    height: 40px;
+    left: 45%;
+    position: absolute;
+    top: 45%;
+    width: 30%;
+}
+
+#treeparent {
+    display: block;
+    max-width: 350px;
+    max-height: 350px;
+    margin: auto;
+    overflow: auto;
+    border: 1px solid #dddddd;
+    border-radius: 3px;
+}
+
+.custom .e-list-parent .e-ul {
+    margin-left: -16px;
+}
+
+.custom .e-list-item .e-fullrow {
+    height: 35px;
+    margin-bottom: -8px;
+}
+
+.custom .e-list-item .e-list-text {
+    line-height: normal;
+}
+
+.custom .e-icons {
+    margin-top: -6px;
+}
+
+.eimage {
+    float: left;
+    padding: 5px 16px 11px 0;
+    height: 40px;
+}
+
+.ename {
+    font-weight: bold;
+    font-size: 14px;
+    padding: 3px 0 0;
+}
+
+.ejob {
+    font-size: 11px;
+    opacity: .60;
+}

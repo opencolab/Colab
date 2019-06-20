@@ -1,0 +1,44 @@
+.card-columns .card .card-body {
+    background-color: white;
+    position: absolute;
+    bottom: 0px;
+    width: 100%;
+    transform: translateY(calc(100% - 40px));
+    transition: transform 0.4s;
+}
+
+.card-columns .card div {
+    position: relative;
+    z-index: 1;
+}
+
+.card-columns .card .card-title {
+    margin-top: -10px;
+}
+
+.card-columns .card img {
+    height: 100%;
+    width: 100%;
+}
+
+.card-columns .card {
+    margin: 20px;
+    height: 320px;
+    width: 250px;
+    position: relative;
+    overflow: hidden;
+    color: black;
+    box-shadow: 0 19px 38px rgba(0, 0, 0, 0.3), 0 15px 12px rgba(0, 0, 0, 0.2);
+}
+
+.card-columns .card:hover .card-body {
+    transform: translateY(0);
+}
+
+.card-columns {
+    justify-content: center;
+    margin-top: 75px;
+    column-count: 4;
+    display: flex;
+    flex-flow: row wrap;
+}
