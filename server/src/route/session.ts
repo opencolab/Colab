@@ -216,6 +216,19 @@ router.get("/:sessionId/grades",  requireToken, async (req, res) => {
     res.status(200).json({ grades: grades });
 });
 
+router.post("/:sessionId/remove", requireToken, async (req, res) => {
+
+    let session = await getRepository(Session).findOne(req.params.sessionId, { relations: ["memberships", "memberships.user"] });
+    if(await getSessionOwner(session) != req["token"].username) { return res.status(403).json({ "error": "You aren't allowed to set permissions"}); }
+
+    if(!req.body.username) { res.status(400).json({ "error": "Missing username field" } ); }
+
+    session.memberships = session.memberships.filter(mship => mship.user.username != req.body.username);
+    await getRepository(Session).save(session);
+
+    res.sendStatus(200);
+});
+
 router.get("/:sessionId/members",async (req, res) => {
     let memberships = (await getRepository(Session).findOne(req.params.sessionId, { relations: ["memberships", "memberships.user"] })).memberships;
     let users = memberships.map(mship => mship.user.username);
