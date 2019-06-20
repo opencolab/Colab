@@ -1,0 +1,11 @@
+.errorDiv {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+body {
+    background: linear-gradient(to bottom, #060c14, #0a1017, #0d131b, #0f151e, #111821) no-repeat center fixed;
+    background-size: cover;
+}

@@ -1,0 +1,134 @@
+@import "dashboard.css";
+@import "profile.css";
+@import "usersTab.css";
+@import "error.css";
+@import "session.css";
+@import "select.css";
+
+@import "./ej2/ej2-base-material.css";
+@import "./ej2/ej2-buttons-material.css";
+@import "./ej2/ej2-grids-material.css";
+@import "./ej2/ej2-icons-material.css";
+@import "./ej2/ej2-inputs-material.css";
+@import "./ej2/ej2-layouts-material.css";
+@import "./ej2/ej2-navigations-material.css";
+@import "./ej2/ej2-popups-material.css";
+@import "./ej2/ej2-react-filemanager-material.css";
+@import "./ej2/ej2-react-navigations-material.css";
+@import "./ej2/ej2-splitbuttons-material.css";
+
+html{
+    height: 100%;
+    width: 100%;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.outerDiv{
+    height: 100%;
+    width: 100%;
+}
+
+code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
+
+.icons {
+    padding-right: 3px;
+    color: black;
+}
+
+small {
+    color: red;
+    float: right;
+}
+
+/* REVIEW: Commented code was removed from here */
+
+.dropdown-toggle.btn.btn-primary::after {
+    vertical-align: 0;
+}
+
+/* REVIEW: Commented code was removed from here */
+
+.navItem:hover {
+    background-color: #0f131b;
+    width: 100%;
+}
+
+.navItemRow {
+    padding-left: 20px;
+    padding-top: 4px;
+}
+
+.nav-link {
+    color: black;
+    max-height: 50px;
+}
+
+.nav-link:hover {
+    color: black;
+}
+
+.shadow-none.dropdown-toggle.btn.btn-link:hover {
+    color: white;
+}
+
+.nav.nav-tabs {
+    border-bottom: 2px solid black;
+}
+
+.nav.nav-tabs a.active {
+    background-color: #070707;
+    color: white;
+    border-top-right-radius: 0;
+    border-top-left-radius: 0;
+    border-bottom: none;
+    border-top: 2px solid black;
+    border-right: 2px solid black;
+    border-left: 2px solid black;
+}
+
+.nav.nav-tabs a.active:hover {
+    color: white;
+}
+
+.fade.tab-pane.active.show {
+    overflow: auto;
+    overflow-x: hidden;
+    max-height: 477px;
+}
+
+.nav.nav-tabs a:hover {
+    color: black;
+}
+
+.nav {
+    width: 100%;
+}
+
+.tabImage {
+    width: 30px;
+    height: 30px;
+    border-radius: 80px;
+    margin-top: 5px;
+}
+
+.shadow-none {
+    color: white;
+}
+
+.dd {
+    width: 252px;
+}
+
+/* REVIEW: Commented code was removed from here */
