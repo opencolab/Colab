@@ -12,10 +12,11 @@ import { createNamespace } from "./sockets";
 
 let router = express.Router();
 
-router.get("/", requireToken, async (req, res) => {
+router.get("/", async (req, res) => {
     let sessionRepo = getRepository(Session);
     let sessions = await sessionRepo.find({ select: ["id", "sname", "description"], where: { hidden: false } });
 
+    for(let i = 0; i < sessions.length; ++i) { sessions[i]["owner"] = await getSessionOwner(sessions[i]["id"]); }
     res.status(200).json({ sessions: sessions });
 });
 
@@ -27,7 +28,8 @@ router.get("/joined", requireToken, async (req, res) => {
             id: mship.session.id,
             sname: mship.session.sname,
             description: mship.session.description,
-            role: mship.role
+            role: mship.role,
+            privacy: mship.session.privacy
         }
     });
     for(let i = 0; i < sessions.length; ++i) { sessions[i]["owner"] = await getSessionOwner(sessions[i]["id"]); }
@@ -41,7 +43,8 @@ router.get("/invited", requireToken, async (req, res) => {
         return {
             id: mship.session.id,
             sname: mship.session.sname,
-            description: mship.session.description
+            description: mship.session.description,
+            privacy: mship.session.privacy
         }
     });
     for(let i = 0; i < sessions.length; ++i) { sessions[i]["owner"] = await getSessionOwner(sessions[i]["id"]); }
@@ -211,6 +214,13 @@ router.get("/:sessionId/grades",  requireToken, async (req, res) => {
     });
 
     res.status(200).json({ grades: grades });
+});
+
+router.get("/:sessionId/members",async (req, res) => {
+    let memberships = (await getRepository(Session).findOne(req.params.sessionId, { relations: ["memberships", "memberships.user"] })).memberships;
+    let users = memberships.map(mship => mship.user.username);
+
+    res.status(200).json(users);
 });
 
 async function getSessionOwner(sessionId) {

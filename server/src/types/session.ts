@@ -5,7 +5,7 @@ import { Grade } from "./grade";
 
 export enum Privacy {
     PUBLIC = "public",
-    HIDDEN = "editor",
+    HIDDEN = "hidden",
     PRIVATE = "private"
 }
 

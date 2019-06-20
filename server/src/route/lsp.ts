@@ -30,51 +30,116 @@ router.post("/run-task", requireToken, async (req, res) => {
     let dataPath = path.join(sessionPath, "data/" + user.username);
     let taskPath = path.join(sessionPath, "tasks/task" + task.id + ".json");
 
-    let cases = JSON.parse(fs.readFileSync(taskPath, { encoding: "utf8"})).cases;
+    let result = { correct: 0, wrong: 0, msgs: [] };
 
-    let compileCmd = JSON.parse(fs.readFileSync(path.join(dataPath, "/compile_commands.json"), { encoding: "utf8"}))[0].command.replace("-c", "");
+    let taskJson = JSON.parse(fs.readFileSync(taskPath, { encoding: "utf8"}));
 
-    cp.execSync(compileCmd, { cwd: dataPath });
+    let cmpResult = compile(dataPath);
 
-    let correct = 0;
-    let wrong = 0;
+    if(cmpResult["success"]) {
+        console.log(taskJson.hints);
+        for(let i = 0; i < taskJson.cases.length; ++i) {
+            let bfr = "";
+            try {
+                let pr = cpp.spawn("./main.exe", [], { cwd: dataPath });
 
-    for(let i = 0; i < cases.length; ++i) {
-        let bfr = "";
-        let pr = cpp.spawn("./main.exe", [], { cwd: dataPath });
+                pr.childProcess.stdout.setEncoding("utf-8");
+                pr.childProcess.stdout.on("data", data => { bfr += data; });
 
-        pr.childProcess.stdout.setEncoding("utf-8");
-        pr.childProcess.stdout.on("data", data => { bfr += data; });
+                for(let j = 0; j < taskJson.cases[i].inputs.length; ++j) { pr.childProcess.stdin.write(taskJson.cases[i].inputs[j] + "\r\n"); }
+                pr.childProcess.stdin.end();
 
-        for(let j = 0; j < cases[i].inputs.length; ++j) { pr.childProcess.stdin.write(cases[i].inputs[j] + "\r\n"); }
-        pr.childProcess.stdin.end();
+                await pr;
 
-        await pr;
-
-        let outputs = bfr.replace("\n", "").split("\r");
-        if(outputs[outputs.length - 1] === "") { outputs.pop(); }
-        if(JSON.stringify(outputs) === JSON.stringify(cases[i].outputs)) {
-            correct++;
-        } else {
-            wrong++;
+                let outputs = bfr.replace("\n", "").split("\r");
+                if(outputs[outputs.length - 1] === "") { outputs.pop(); }
+                if(JSON.stringify(outputs) === JSON.stringify(taskJson.cases[i].outputs)) {
+                    result.correct++;
+                } else {
+                    result.wrong++;
+                    for(let j = 0; j < taskJson.hints.length; ++j) {
+                        if(i == taskJson.hints[j].case) {
+                            result.msgs.push("Hint for Case #" + i + ": " + taskJson.hints[j].hint)
+                        }
+                    }
+                }
+            } catch(e) {
+                result.wrong++;
+                result.msgs.push("Runtime Error for Case #" + i);
+            }
+            bfr = "";
         }
-        bfr = "";
+    } else {
+        result.correct = 0;
+        result.wrong = taskJson.cases.length;
+        result.msgs.push(cmpResult["error"]);
     }
 
     let grade = new Grade();
     grade.session = session;
     grade.task = task;
     grade.user = user;
-    grade.correct = correct;
-    grade.wrong = wrong;
+    grade.correct = result.correct;
+    grade.wrong = result.wrong;
 
     await getRepository(Grade).save(grade);
 
-    res.status(200).json({
-        correct: correct,
-        wrong: wrong
-    });
-
+    res.status(200).json(result);
 });
+
+router.post("/run", requireToken, async (req, res) => {
+
+    if(!req.body.sessionId) { return res.status(400).json({ "error": "Missing sessionId field" }); }
+    if(!req.body.username) { return res.status(400).json({ "error": "Missing username field" }); }
+    if(!req.body.inputs) { return res.status(400).json({ "error": "Missing inputs array" }); }
+
+    let session = await getRepository(Session).findOne(req.body.sessionId);
+    let user = await getRepository(User).findOne(req.body.username);
+
+    if(!session) { return res.status(400).json({ "error": "Session does not exist" }); }
+    if(!user) { return res.status(400).json({ "error": "User does not exist" }); }
+
+    let sessionPath = path.join(__dirname, "../../sessions/" + session.id);
+    let dataPath = path.join(sessionPath, "data/" + user.username);
+
+    let cmpResult = compile(dataPath);
+
+    if(cmpResult["success"]) {
+        try {
+            let bfr = "";
+            let pr = cpp.spawn("./main.exe", [], { cwd: dataPath });
+
+            pr.childProcess.stdout.setEncoding("utf-8");
+            pr.childProcess.stdout.on("data", data => { bfr += data; });
+
+            for(let i = 0; i < req.body.inputs.length; ++i) { pr.childProcess.stdin.write(req.body.inputs[i] + "\r\n"); }
+            pr.childProcess.stdin.end();
+
+            await pr;
+
+            let outputs = bfr.replace("\n", "").split("\r");
+            if(outputs[outputs.length - 1] === "") { outputs.pop(); }
+
+            res.status(200).json({ success: true, outputs: outputs });
+        } catch (e) {
+            res.status(200).json({ success: false, error: e.message });
+        }
+
+    } else {
+        res.status(200).json({ success: false, error: cmpResult["error"] });
+    }
+});
+
+function compile(dataPath) {
+    let result = { success: true };
+
+    let compileCmd = JSON.parse(fs.readFileSync(path.join(dataPath, "/compile_commands.json"), { encoding: "utf8"}))[0].command.replace("-c", "");
+    try { cp.execSync(compileCmd, { cwd: dataPath } );
+    } catch (e) {
+        result.success = false;
+        result["error"] = e.message;
+    }
+    return result;
+}
 
 export { router }
