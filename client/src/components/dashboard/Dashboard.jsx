@@ -5,7 +5,7 @@ import {connect} from "react-redux";
 
 import DashboardCard from "./DashboardCard";
 
-import {getPublicSessions} from "../../store/actions/session/getPublicSessions";
+import {getPublicSessionsAction} from "../../store/actions/session/getPublicSessionsAction";
 
 import {PUBLIC_SESSIONS} from "../../store/data/mapping/session";
 
@@ -33,7 +33,7 @@ const mapStateToProps = (combineReducers) => {
 };
 
 const mapDispatchToProps = (dispatch) => {
-    return {getSessions: () => dispatch(getPublicSessions())}
+    return {getSessions: () => dispatch(getPublicSessionsAction())}
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Dashboard);

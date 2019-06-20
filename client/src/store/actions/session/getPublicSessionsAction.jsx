@@ -1,9 +1,9 @@
 import axios from "axios";
 
-import {GET_PUBLIC_SESSIONS} from "../../data/mapping/api";
+import {GET_PUBLIC_SESSIONS} from "../../data/mapping/serverURLS";
 import {PUBLIC_SESSIONS_RETRIEVED} from "../../data/mapping/session";
 
-export const getPublicSessions = () => {
+export const getPublicSessionsAction = () => {
     return (dispatch) => {
         axios.get(
             GET_PUBLIC_SESSIONS,

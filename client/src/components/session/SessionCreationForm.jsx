@@ -4,7 +4,7 @@ import {Button, Form, Modal} from "react-bootstrap";
 import {connect} from "react-redux";
 import {withRouter} from "react-router-dom";
 
-import {createSession} from "../../store/actions/session/createSession";
+import {createSessionAction} from "../../store/actions/session/createSessionAction";
 
 import {SESSION_DESCRIPTION, SESSION_HIDDEN, SESSION_NAME} from "../../store/data/mapping/session";
 import {CLOSE_FORM, SESSION_CREATION_FORM} from "../../store/data/mapping/form";
@@ -124,7 +124,7 @@ const mapStateToProps = (combinedReducer) => {
 
 const mapDispatchTpProps = (dispatch) => {
     return {
-        createSession: (sessionInfo, callback) => dispatch(createSession(sessionInfo, callback)),
+        createSession: (sessionInfo, callback) => dispatch(createSessionAction(sessionInfo, callback)),
         closeSessionCreator: () => dispatch({type: SESSION_CREATION_FORM, payload: CLOSE_FORM})
     }
 };

@@ -7,11 +7,11 @@ import {MDBIcon} from "mdbreact";
 
 import SessionCreationForm from "../session/SessionCreationForm";
 
-import {signOut} from "../../store/actions/authentication/signOut";
+import {signOutAction} from "../../store/actions/authentication/signOutAction";
 
 import {USERNAME} from "../../store/data/mapping/user";
-import {MY_SESSIONS_URL, USER_PROFILE_URL} from "../../store/data/mapping/url";
-import {GET_PROFILE_PIC} from "../../store/data/mapping/api";
+import {MY_SESSIONS_URL, USER_PROFILE_URL} from "../../store/data/mapping/URL";
+import {GET_PROFILE_PIC} from "../../store/data/mapping/serverURLS";
 import {OPEN_FORM, SESSION_CREATION_FORM} from "../../store/data/mapping/form";
 
 class UserPanel extends Component {
@@ -80,7 +80,7 @@ class UserPanel extends Component {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        signOut: (history) => dispatch(signOut(history)),
+        signOut: (history) => dispatch(signOutAction(history)),
         openSessionCreator: () => dispatch({type: SESSION_CREATION_FORM, payload: OPEN_FORM})
     }
 };

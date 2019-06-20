@@ -14,7 +14,7 @@ import {
     SESSION_NAME
 } from "../../store/data/mapping/session";
 
-import {getMySessions} from "../../store/actions/session/getMySessions";
+import {getMySessionsAction} from "../../store/actions/session/getMySessionsAction";
 
 class MySessions extends Component {
     state = {loaded: false};
@@ -92,7 +92,7 @@ const mapStateTpProps = (combinedReducer) => {
 };
 const mapDispatchTpProps = (dispatch) => {
     return {
-        getMySessions: (callback) => dispatch(getMySessions(callback))
+        getMySessions: (callback) => dispatch(getMySessionsAction(callback))
     };
 
 };

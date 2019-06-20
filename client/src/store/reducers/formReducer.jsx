@@ -6,7 +6,7 @@ const initState = {
     [SESSION_CREATION_FORM]: false
 };
 
-const form = (state = initState, action) => {
+const formReducer = (state = initState, action) => {
     switch (action.type) {
         case SIGN_IN_FORM:
             return {...state, [SIGN_IN_FORM]: action.payload};
@@ -19,4 +19,4 @@ const form = (state = initState, action) => {
     }
 };
 
-export default form;
+export default formReducer;

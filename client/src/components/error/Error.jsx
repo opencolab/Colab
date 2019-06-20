@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 
 import {Alert, Button} from "react-bootstrap";
 
-import {HOME_URL} from "../../store/data/mapping/url";
+import {HOME_URL} from "../../store/data/mapping/URL";
 
 class Error extends Component {
 

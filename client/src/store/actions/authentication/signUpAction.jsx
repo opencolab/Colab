@@ -1,10 +1,10 @@
 import axios from "axios/index";
 
 import {USERNAME} from "../../data/mapping/user";
-import {SIGN_UP} from "../../data/mapping/api";
-import {REGISTERED, REGISTRATION_ERROR} from "../../data/mapping/authentication";
+import {SIGN_UP} from "../../data/mapping/serverURLS";
+import {REGISTERED, REGISTRATION_ERROR} from "../../data/mapping/auth";
 
-export const signUp = (signUpData, callback) => {
+export const signUpAction = (signUpData, callback) => {
     return (dispatch) => {
         console.log(signUpData);
         axios.post(SIGN_UP, {user: signUpData})

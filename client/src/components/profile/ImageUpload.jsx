@@ -53,7 +53,7 @@ class ImageUpload extends Component {
 }
 
 const mapStateToProps = (combinedReducers) => {
-    return {img: combinedReducers.profile.profile[IMAGE]}
+    return {img: combinedReducers.profileReducer.profileReducer[IMAGE]}
 };
 
 const mapDispatchToProps = (dispatch) => {

@@ -11,7 +11,7 @@ import SearchBar from "./SearchBar";
 import UserPanel from "./UserPanel";
 
 
-import {DASHBOARD_URL, HOME_URL} from "../../store/data/mapping/url";
+import {DASHBOARD_URL, HOME_URL} from "../../store/data/mapping/URL";
 import {OPEN_FORM, SIGN_IN_FORM, SIGN_UP_FORM} from "../../store/data/mapping/form";
 
 class Header extends Component {

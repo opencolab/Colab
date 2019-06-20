@@ -7,7 +7,7 @@ import Authenticate from "../authentication/Authenticate";
 
 import {MY_SESSIONS} from "../../store/data/mapping/session";
 
-import {getMySessions} from "../../store/actions/session/getMySessions";
+import {getMySessionsAction} from "../../store/actions/session/getMySessionsAction";
 
 import MySessions from "./MySessions";
 
@@ -71,7 +71,7 @@ const mapStateTpProps = (combinedReducer) => {
 };
 
 const mapDispatchTpProps = (dispatch) => {
-    return {getMySessions: (callback) => dispatch(getMySessions(callback))};
+    return {getMySessions: (callback) => dispatch(getMySessionsAction(callback))};
 
 };
 

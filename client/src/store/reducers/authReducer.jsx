@@ -1,4 +1,4 @@
-import {UNAUTHENTICATED} from "../actions/authentication/signOut";
+import {UNAUTHENTICATED} from "../actions/authentication/signOutAction";
 
 import {
     AUTHENTICATED,
@@ -7,7 +7,7 @@ import {
     CLEAR_SIGN_UP_ERROR,
     REGISTERED,
     REGISTRATION_ERROR,
-} from "../data/mapping/authentication";
+} from "../data/mapping/auth";
 
 const initState = {authenticated: false, [AUTHENTICATION_ERROR]: "", [REGISTRATION_ERROR]: ""};
 

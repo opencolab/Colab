@@ -44,7 +44,7 @@ class ProfileImage extends Component {
 }
 
 const mapStateToProps = (combinedReducers) => {
-    return {img: combinedReducers.profile.profile[IMAGE]}
+    return {img: combinedReducers.profileReducer.profileReducer[IMAGE]}
 };
 
 export default connect(mapStateToProps)(ProfileImage);

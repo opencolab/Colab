@@ -1,9 +1,9 @@
 import axios from "axios";
 
-import {CREATE_SESSION} from "../../data/mapping/api";
+import {CREATE_SESSION} from "../../data/mapping/serverURLS";
 import {SESSION_CREATED} from "../../data/mapping/session";
 
-export const createSession = (session, callback) => {
+export const createSessionAction = (session, callback) => {
     return (dispatch) => {
         axios.post(
             CREATE_SESSION,

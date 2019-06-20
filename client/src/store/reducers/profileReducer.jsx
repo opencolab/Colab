@@ -14,7 +14,7 @@ import {
 
 const initState = {profile: null};
 
-const profile = (state = initState, action) => {
+const profileReducer = (state = initState, action) => {
     switch (action.type) {
         case PROFILE_UPDATED:
             return {...state, profile: null};
@@ -43,4 +43,4 @@ const profile = (state = initState, action) => {
     }
 };
 
-export default profile;
+export default profileReducer;

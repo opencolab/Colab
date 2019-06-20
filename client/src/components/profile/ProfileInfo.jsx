@@ -168,7 +168,7 @@ class ProfileInfo extends Component {
 }
 
 const mapStateToProps = (combinedReducers) => {
-    return {user: combinedReducers.profile.profile}
+    return {user: combinedReducers.profileReducer.profileReducer}
 };
 
 const mapDispatchToProps = (dispatch) => {

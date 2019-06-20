@@ -11,10 +11,10 @@ import {
     PROFILE_UPDATED
 } from "../../data/mapping/user";
 
-import {DASHBOARD_URL} from "../../data/mapping/url";
-import {UPDATE_PROFILE} from "../../data/mapping/api";
+import {DASHBOARD_URL} from "../../data/mapping/URL";
+import {UPDATE_PROFILE} from "../../data/mapping/serverURLS";
 
-export const updateProfile = (profile, history) => {
+export const updateProfileAction = (profile, history) => {
     return (dispatch) => {
         const data = new FormData();
 

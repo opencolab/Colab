@@ -8,12 +8,12 @@ import './css/index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 import {applyMiddleware, createStore} from "redux";
-import combined from "./store/reducers/combined";
+import combinedReducers from "./store/reducers/combinedReducers";
 import {Provider} from "react-redux"
 import thunk from "redux-thunk"
-import {AUTHENTICATED} from "./store/data/mapping/authentication";
+import {AUTHENTICATED} from "./store/data/mapping/auth";
 
-const store = createStore(combined, applyMiddleware(thunk));
+const store = createStore(combinedReducers, applyMiddleware(thunk));
 
 const user = localStorage.getItem('user');
 if (user) {

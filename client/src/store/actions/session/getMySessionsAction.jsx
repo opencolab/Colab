@@ -1,9 +1,9 @@
 import axios from "axios";
 
-import {GET_MY_SESSIONS} from "../../data/mapping/api";
+import {GET_MY_SESSIONS} from "../../data/mapping/serverURLS";
 import {MY_SESSIONS_RETRIEVED} from "../../data/mapping/session";
 
-export const getMySessions = (callback) => {
+export const getMySessionsAction = (callback) => {
     return (dispatch) => {
         axios.get(GET_MY_SESSIONS, {headers: {'Authorization': "bearer " + localStorage.getItem('user')}})
 

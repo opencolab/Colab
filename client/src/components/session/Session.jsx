@@ -9,10 +9,10 @@ import axios from "axios";
 import SessionLayout from "./SessionLayout";
 import SessionPanel from "./SessionPanel";
 
-import {joinSession} from "../../store/actions/session/joinSession";
+import {joinSessionAction} from "../../store/actions/session/joinSessionAction";
 
 import {SESSION_SOCKET} from "../../store/data/mapping/socket";
-import {GET_PROFILE_PIC} from "../../store/data/mapping/api";
+import {GET_PROFILE_PIC} from "../../store/data/mapping/serverURLS";
 import {SESSION_CONNECTED_USERS} from "../../store/data/mapping/session";
 import {USERNAME} from "../../store/data/mapping/user";
 
@@ -164,7 +164,7 @@ const mapStateToProps = (combinedReducer) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        joinSession: (id, callback) => dispatch(joinSession(id, callback)),
+        joinSession: (id, callback) => dispatch(joinSessionAction(id, callback)),
         updateSessionUsers: (users) => dispatch({type: SESSION_CONNECTED_USERS, payload: users})
     };
 };

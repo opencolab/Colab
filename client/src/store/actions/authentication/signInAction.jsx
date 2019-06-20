@@ -1,11 +1,11 @@
 import axios from "axios/index";
 
 import {USERNAME} from "../../data/mapping/user";
-import {SIGN_IN} from "../../data/mapping/api";
-import {AUTHENTICATED, AUTHENTICATION_ERROR} from "../../data/mapping/authentication";
+import {SIGN_IN} from "../../data/mapping/serverURLS";
+import {AUTHENTICATED, AUTHENTICATION_ERROR} from "../../data/mapping/auth";
 import {CONNECT_TO_DEFAULT_SOCKET} from "../../data/mapping/socket";
 
-export const signIn = (signInData, callback) => {
+export const signInAction = (signInData, callback) => {
     return (dispatch) => {
         axios.post(SIGN_IN, {user: signInData})
             .then((res) => {

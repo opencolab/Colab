@@ -4,11 +4,11 @@ import {Button, Form, Modal} from "react-bootstrap";
 import {connect} from "react-redux";
 import {withRouter} from "react-router-dom";
 
-import {signUp} from "../../store/actions/authentication/signUp";
+import {signUpAction} from "../../store/actions/authentication/signUpAction";
 
-import {DASHBOARD_URL} from "../../store/data/mapping/url";
+import {DASHBOARD_URL} from "../../store/data/mapping/URL";
 import {EMAIL, PASSWORD, USERNAME} from "../../store/data/mapping/user";
-import {CLEAR_SIGN_UP_ERROR, REGISTRATION_ERROR} from "../../store/data/mapping/authentication";
+import {CLEAR_SIGN_UP_ERROR, REGISTRATION_ERROR} from "../../store/data/mapping/auth";
 import {CLOSE_FORM, SIGN_UP_FORM} from "../../store/data/mapping/form";
 import {EmailRegex, PasswordRegex, UsernameRegex} from "../../store/data/mapping/regex";
 
@@ -141,7 +141,7 @@ const mapStateToProps = (combinedReducer) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        signUp: (signUpData, callback) => dispatch(signUp(signUpData, callback)),
+        signUp: (signUpData, callback) => dispatch(signUpAction(signUpData, callback)),
         clearErrorMessage: () => dispatch({type: CLEAR_SIGN_UP_ERROR}),
         closeSignUp: () => dispatch({type: SIGN_UP_FORM, payload: CLOSE_FORM})
     };

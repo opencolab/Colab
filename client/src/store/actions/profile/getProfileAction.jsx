@@ -1,9 +1,9 @@
 import axios from "axios";
 
 import {IMAGE, PROFILE_RETRIEVAL_ERROR, PROFILE_RETRIEVED, USERNAME} from "../../data/mapping/user";
-import {GET_PROFILE_INFO, GET_PROFILE_PIC} from "../../data/mapping/api";
+import {GET_PROFILE_INFO, GET_PROFILE_PIC} from "../../data/mapping/serverURLS";
 
-export const getProfile = (callback) => {
+export const getProfileAction = (callback) => {
     return (dispatch) => {
         axios.get(GET_PROFILE_INFO + localStorage.getItem(USERNAME))
             .then((res) => {

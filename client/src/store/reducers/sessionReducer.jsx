@@ -13,7 +13,7 @@ const initState = {
     [MY_SESSIONS]: null,
 };
 
-const session = (state = initState, action) => {
+const sessionReducer = (state = initState, action) => {
     switch (action.type) {
         case SESSION_CREATED:
             return {...state, [SESSION]: action.payload};
@@ -26,4 +26,4 @@ const session = (state = initState, action) => {
     }
 };
 
-export default session;
+export default sessionReducer;

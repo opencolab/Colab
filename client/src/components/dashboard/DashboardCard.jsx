@@ -5,7 +5,7 @@ import Button from "react-bootstrap/Button";
 
 import {SESSION_DESCRIPTION, SESSION_ID, SESSION_NAME} from "../../store/data/mapping/session";
 
-import {JOIN_SESSION} from "../../store/data/mapping/api";
+import {JOIN_SESSION} from "../../store/data/mapping/serverURLS";
 
 class DashboardCard extends Component{
     state = { collapse: false };

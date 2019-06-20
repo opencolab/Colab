@@ -6,8 +6,8 @@ import {connect} from "react-redux";
 import ProfileImage from "./ProfileImage";
 import ProfileInfo from "./ProfileInfo";
 
-import {getProfile} from "../../store/actions/profile/getProfile";
-import {updateProfile} from "../../store/actions/profile/updateProfile";
+import {getProfileAction} from "../../store/actions/profile/getProfileAction";
+import {updateProfileAction} from "../../store/actions/profile/updateProfileAction";
 
 import Authenticate from "../authentication/Authenticate";
 
@@ -41,7 +41,7 @@ class UserProfile extends Component {
             return (
                 <Form
                     id={"profile_form"}
-                    className={"profile"}
+                    className={"profileReducer.jsx"}
                     onSubmit={this.saveChanges}
                     noValidate
                     validated={this.state.validated}>
@@ -54,13 +54,13 @@ class UserProfile extends Component {
 }
 
 const mapStateToProps = (combinedReducers) => {
-    return {user: combinedReducers.profile.profile}
+    return {user: combinedReducers.profileReducer.profileReducer}
 };
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        getProfile: (callback) => dispatch(getProfile(callback)),
-        updateProfile: (profile, history) => dispatch(updateProfile(profile, history))
+        getProfile: (callback) => dispatch(getProfileAction(callback)),
+        updateProfile: (profile, history) => dispatch(updateProfileAction(profile, history))
     }
 };
 
