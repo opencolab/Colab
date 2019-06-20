@@ -26,7 +26,8 @@ router.get("/joined", requireToken, async (req, res) => {
         return {
             id: mship.session.id,
             sname: mship.session.sname,
-            description: mship.session.description
+            description: mship.session.description,
+            role: mship.role
         }
     });
     for(let i = 0; i < sessions.length; ++i) { sessions[i]["owner"] = await getSessionOwner(sessions[i]["id"]); }
