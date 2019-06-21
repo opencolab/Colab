@@ -26,9 +26,10 @@ router.post("/update-profile", requireToken, ppicUpload.single("ppic"), async (r
     let user = await userRepo.findOne(req["token"].username);
 
     if(req.body.oldHash == user.hash) {
-        fs.renameSync(req.file.path, req.file.path.slice(0, -4));
-        fs.writeFileSync(path.join(__dirname, "../../ppics/") + req["token"].username + ".meta", path.extname(req.file.originalname).slice(1));
-
+        if(req.file !== undefined) {
+            fs.renameSync(req.file.path, req.file.path.slice(0, -4));
+            fs.writeFileSync(path.join(__dirname, "../../ppics/") + req["token"].username + ".meta", path.extname(req.file.originalname).slice(1));
+        }
         if(req.body.email) { user.email = req.body.email; }
         if(req.body.fname) { user.fname = req.body.fname; }
         if(req.body.lname) { user.lname = req.body.lname; }
@@ -38,7 +39,9 @@ router.post("/update-profile", requireToken, ppicUpload.single("ppic"), async (r
 
         res.sendStatus(200);
     } else {
-        fs.unlinkSync(req.file.path);
+        if(req.file !== undefined) {
+            fs.unlinkSync(req.file.path);
+        }
         res.status(403).json({ error: "Bad Credentials" });
     }
 });
