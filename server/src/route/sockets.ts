@@ -21,11 +21,13 @@ export function createNamespace(nspId: string) {
         nsp.on("connection", socket => {
 
             console.log(nsp.name + ": " + socket["token"].user.username + " connected!");
-            nsp.emit("user-joined", socket["token"].user.username);
+
 
             socket.emit("current-users", Object.values(nsp.sockets)
                 .filter(skt => skt["token"].user.username != socket["token"].user.username)
-                .map(skt => skt["token"].user.username));
+                .map(skt => skt["token"].user.username),
+                () => { nsp.emit("user-joined", socket["token"].user.username); }
+            );
 
             socket.on("save-file", (data, fn) => {
                 fs.writeFileSync(path.join(__dirname, "../../sessions/" + nspId.slice(1) + "/data/" + socket["token"].user.username + "/main.cpp"), data);
