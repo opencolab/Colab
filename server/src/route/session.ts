@@ -167,6 +167,7 @@ router.post("/create-task", requireToken, async (req, res) => {
     let task = new Task();
     task.session = session;
     task.id = session.tasks.length + 1;
+    task.cases = req.body.task.cases.length;
     if(req.body.task.name) { task.name = req.body.task.name; }
     if(req.body.task.description) { task.name = req.body.task.description; }
     if(req.body.task.hints) { task.hints = req.body.task.hints; } else { task.hints = []; }
@@ -214,6 +215,78 @@ router.get("/:sessionId/grades",  requireToken, async (req, res) => {
     });
 
     res.status(200).json({ grades: grades });
+});
+
+var pdf = require('../pdf/pdfmake');
+var vfs = require('../pdf/vfs_fonts.js');
+
+router.get("/:sessionId/grades-pdf", async (req, res) => {
+    let session = await getRepository(Session).findOne(req.params.sessionId, {relations: ["memberships", "memberships.user", "memberships.session", "tasks"] });
+    let gradesRepo = getRepository(Grade);
+
+    if(!session) { return res.status(400).json({ "error": "Session doesn't exist"}); }
+
+    let rows = [];
+
+    for(let i = 0; i < session.memberships.length; ++i) {
+        let total = 0;
+        let max = 0;
+        rows.push({ user: session.memberships[i].user.username, grades: [] });
+        for(let j = 0; j < session.tasks.length; ++j) { rows[i].grades.push(0); max += session.tasks[j].cases; }
+
+        let grades = await gradesRepo.find({ where: { session: session, user: session.memberships[i].user }, relations: ["task"] });
+        for(let j = 0; j < grades.length; ++j) {
+            rows[i].grades[grades[j].task.id - 1] = grades[j].correct;
+            total += grades[j].correct;
+        }
+        rows[i].grades.push(total);
+        rows[i].grades.push(((total/max) * 100.0).toPrecision(2));
+    }
+
+    let docDefinition = {
+        content: [
+            {
+                layout: "lightHorizontalLines'", // optional"
+                table: {
+                    // headers are automatically repeated if the table spans over multiple pages
+                    // you can declare how many rows should be treated as headers
+                    headerRows: 1,
+                    widths: [],
+
+                    body: []
+                }
+            }
+        ]
+    };
+
+    docDefinition.content[0].table.widths.push("*");
+    for(let i = 0; i < session.tasks.length + 2; ++i) { docDefinition.content[0].table.widths.push("auto"); }
+
+    docDefinition.content[0].table.body.push([]);
+    docDefinition.content[0].table.body[0].push("User");
+
+    let max = 0;
+    for(let i = 0; i < session.tasks.length; ++i) { docDefinition.content[0].table.body[0].push("Task " + (i + 1) + " /" + session.tasks[i].cases); max += session.tasks[i].cases; }
+    docDefinition.content[0].table.body[0].push("Total /" + max);
+    docDefinition.content[0].table.body[0].push("%");
+
+    for(let i = 0; i < rows.length; ++i) {
+        docDefinition.content[0].table.body.push([]);
+        docDefinition.content[0].table.body[i + 1].push(rows[i].user);
+        for(let j = 0; j < rows[i].grades.length; ++j) {
+            docDefinition.content[0].table.body[i + 1].push(rows[i].grades[j]);
+        }
+    }
+
+    pdf.vfs = vfs.pdfMake.vfs;
+
+    let doc = pdf.createPdf(docDefinition);
+    doc.getBase64(data => {
+        res.writeHead(200);
+        let download = Buffer.from(data, "base64");
+        res.end(download);
+    });
+
 });
 
 router.post("/:sessionId/remove", requireToken, async (req, res) => {

@@ -20,6 +20,9 @@ export class Task {
     @Column("simple-array")
     hints: string[];
 
+    @Column()
+    cases: number;
+
     @OneToMany(() => Grade, grade => grade.task, { cascade: true, onDelete: "CASCADE"})
     grades: Grade[];
 
