@@ -16,9 +16,9 @@ export class Grade {
     user: User;
 
     @Column()
-    correct: number;
+    score: number;
 
     @Column()
-    wrong: number;
+    max: number;
 
 }

@@ -171,6 +171,10 @@ router.post("/create-task", requireToken, async (req, res) => {
     if(req.body.task.name) { task.name = req.body.task.name; }
     if(req.body.task.description) { task.name = req.body.task.description; }
     if(req.body.task.hints) { task.hints = req.body.task.hints; } else { task.hints = []; }
+    task.maxScore = 0;
+    for(let i = 0; i < req.body.task.cases; ++i) {
+        if(req.body.task.cases[i].weight) { task.maxScore += req.body.task.cases[i].weight; } else { task.maxScore += 1; }
+    }
 
     task = await getRepository(Task).save(task);
     writeTest(session.id, task.id, req.body.task.cases);
@@ -209,8 +213,8 @@ router.get("/:sessionId/grades",  requireToken, async (req, res) => {
         return {
             user: grade.user.username,
             task: grade.task,
-            correct: grade.correct,
-            wrong: grade.wrong
+            score: grade.score,
+            max: grade.max
         }
     });
 
@@ -229,15 +233,15 @@ router.get("/:sessionId/grades-pdf", async (req, res) => {
     let rows = [];
 
     for(let i = 0; i < session.memberships.length; ++i) {
-        let total = 0;
         let max = 0;
+        let total = 0;
         rows.push({ user: session.memberships[i].user.username, grades: [] });
-        for(let j = 0; j < session.tasks.length; ++j) { rows[i].grades.push(0); max += session.tasks[j].cases; }
+        for(let j = 0; j < session.tasks.length; ++j) { rows[i].grades.push(0); max += session.tasks[j].maxScore; }
 
         let grades = await gradesRepo.find({ where: { session: session, user: session.memberships[i].user }, relations: ["task"] });
         for(let j = 0; j < grades.length; ++j) {
-            rows[i].grades[grades[j].task.id - 1] = grades[j].correct;
-            total += grades[j].correct;
+            rows[i].grades[grades[j].task.id - 1] = grades[j].score;
+            total += grades[j].score;
         }
         rows[i].grades.push(total);
         rows[i].grades.push(((total/max) * 100.0).toPrecision(2));
@@ -266,7 +270,7 @@ router.get("/:sessionId/grades-pdf", async (req, res) => {
     docDefinition.content[0].table.body[0].push("User");
 
     let max = 0;
-    for(let i = 0; i < session.tasks.length; ++i) { docDefinition.content[0].table.body[0].push("Task " + (i + 1) + " /" + session.tasks[i].cases); max += session.tasks[i].cases; }
+    for(let i = 0; i < session.tasks.length; ++i) { docDefinition.content[0].table.body[0].push("Task " + (i + 1) + " /" + session.tasks[i].maxScore); max += session.tasks[i].maxScore; }
     docDefinition.content[0].table.body[0].push("Total /" + max);
     docDefinition.content[0].table.body[0].push("%");
 

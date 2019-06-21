@@ -23,6 +23,9 @@ export class Task {
     @Column()
     cases: number;
 
+    @Column()
+    maxScore: number;
+
     @OneToMany(() => Grade, grade => grade.task, { cascade: true, onDelete: "CASCADE"})
     grades: Grade[];
 

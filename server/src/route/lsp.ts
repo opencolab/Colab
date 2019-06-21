@@ -30,14 +30,16 @@ router.post("/run-task", requireToken, async (req, res) => {
     let dataPath = path.join(sessionPath, "data/" + user.username);
     let taskPath = path.join(sessionPath, "tasks/task" + task.id + ".json");
 
-    let result = { correct: 0, wrong: 0, msgs: [] };
+    let result = { score: 0, msgs: [] };
 
     let taskJson = JSON.parse(fs.readFileSync(taskPath, { encoding: "utf8"}));
 
     let cmpResult = compile(dataPath);
 
+    let max = 0;
+    for(let i = 0; i < taskJson.cases.length; ++i) { if(taskJson.cases[i].weight) { max += taskJson.cases[i].weight; } else { max++; } }
+
     if(cmpResult["success"]) {
-        console.log(taskJson.hints);
         for(let i = 0; i < taskJson.cases.length; ++i) {
             let bfr = "";
             try {
@@ -54,24 +56,16 @@ router.post("/run-task", requireToken, async (req, res) => {
                 let outputs = bfr.replace("\n", "").split("\r");
                 if(outputs[outputs.length - 1] === "") { outputs.pop(); }
                 if(JSON.stringify(outputs) === JSON.stringify(taskJson.cases[i].outputs)) {
-                    result.correct++;
+                    if(taskJson.cases[i].weight) { result.score += taskJson.cases[i].weight; } else { result.score++; }
                 } else {
-                    result.wrong++;
-                    for(let j = 0; j < taskJson.hints.length; ++j) {
-                        if(i == taskJson.hints[j].case) {
-                            result.msgs.push("Hint for Case #" + i + ": " + taskJson.hints[j].hint)
-                        }
-                    }
+                    if(taskJson.cases[i].hint) { result.msgs.push("Hint for Case #" + i + ": " + taskJson.cases[i].hint) }
                 }
             } catch(e) {
-                result.wrong++;
                 result.msgs.push("Runtime Error for Case #" + i);
             }
             bfr = "";
         }
     } else {
-        result.correct = 0;
-        result.wrong = taskJson.cases.length;
         result.msgs.push(cmpResult["error"]);
     }
 
@@ -79,8 +73,8 @@ router.post("/run-task", requireToken, async (req, res) => {
     grade.session = session;
     grade.task = task;
     grade.user = user;
-    grade.correct = result.correct;
-    grade.wrong = result.wrong;
+    grade.score = result.score;
+    grade.max = max;
 
     await getRepository(Grade).save(grade);
 
