@@ -17,9 +17,6 @@ export class Task {
     @Column({ default: "" })
     description: string;
 
-    @Column("simple-array")
-    hints: string[];
-
     @Column()
     cases: number;
 

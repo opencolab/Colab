@@ -1,14 +1,15 @@
 import express from "express";
-import { getRepository } from "typeorm";
-import { requireToken} from "./auth";
-import { Privacy, Session} from "../types/session";
+import {getRepository} from "typeorm";
+import {requireToken} from "./auth";
+import {Privacy, Session} from "../types/session";
 import fs from "fs";
 import path from "path";
-import { Membership, Role } from "../types/membership";
-import { User } from "../types/user";
-import { Task } from "../types/task";
-import { Grade } from "../types/grade";
-import { createNamespace } from "./sockets";
+import {Membership, Role} from "../types/membership";
+import {User} from "../types/user";
+import {Task} from "../types/task";
+import {Grade} from "../types/grade";
+import {createNamespace} from "./sockets";
+import {io} from "../app";
 
 let router = express.Router();
 
@@ -69,6 +70,17 @@ router.post("/invite",  requireToken, async (req, res) => {
         membership.session = session;
         membership.role = Role.PENDING;
         await getRepository(Membership).save(membership);
+
+        for(let i = 0; i < Object.values(io.sockets.sockets).length; ++i) {
+            if(Object.values(io.sockets.sockets)[i]["token"].username == user.username) {
+                Object.values(io.sockets.sockets)[i].emit("invited", {
+                    id: session.id,
+                    sname: session.sname,
+                    description: session.description,
+                    privacy: session.privacy
+                });
+            }
+        }
 
         res.sendStatus(200);
     } else {
@@ -170,7 +182,6 @@ router.post("/create-task", requireToken, async (req, res) => {
     task.cases = req.body.task.cases.length;
     if(req.body.task.name) { task.name = req.body.task.name; }
     if(req.body.task.description) { task.name = req.body.task.description; }
-    if(req.body.task.hints) { task.hints = req.body.task.hints; } else { task.hints = []; }
     task.maxScore = 0;
     for(let i = 0; i < req.body.task.cases; ++i) {
         if(req.body.task.cases[i].weight) { task.maxScore += req.body.task.cases[i].weight; } else { task.maxScore += 1; }
@@ -188,7 +199,8 @@ router.post("/:sessionId/set-permission",  requireToken, async (req, res) => {
     if(!session) { return res.status(400).json({ "error": "Session doesn't exist"}); }
     if(!user) { return res.status(400).json({ "error": "User doesn't exist"}); }
     if(!req.body.role) { return res.status(400).json({ "error": "Missing role field"}); }
-    if(await getSessionOwner(session) != req["token"].username) { return res.status(403).json({ "error": "You aren't allowed to set permissions"}); }
+    if(await getSessionOwner(session) != req["token"].username) { return res.status(403).json({ "error": "You aren't allowed to set permissions" }); }
+    if(await getSessionOwner(session) != user.username) { return res.status(403).json({ "error": "You aren't allowed to change your permissions" }); }
 
     let membership = new Membership();
     membership.session = session;
@@ -233,22 +245,31 @@ router.get("/:sessionId/grades-pdf", async (req, res) => {
     let rows = [];
 
     for(let i = 0; i < session.memberships.length; ++i) {
-        let max = 0;
-        let total = 0;
-        rows.push({ user: session.memberships[i].user.username, grades: [] });
-        for(let j = 0; j < session.tasks.length; ++j) { rows[i].grades.push(0); max += session.tasks[j].maxScore; }
+        if(session.memberships[i].role == Role.GHOST) {
+            let max = 0;
+            let total = 0;
+            rows.push({user: session.memberships[i].user.username, grades: []});
+            for (let j = 0; j < session.tasks.length; ++j) {
+                rows[i].grades.push(0);
+                max += session.tasks[j].maxScore;
+            }
 
-        let grades = await gradesRepo.find({ where: { session: session, user: session.memberships[i].user }, relations: ["task"] });
-        for(let j = 0; j < grades.length; ++j) {
-            rows[i].grades[grades[j].task.id - 1] = grades[j].score;
-            total += grades[j].score;
+            let grades = await gradesRepo.find({
+                where: {session: session, user: session.memberships[i].user},
+                relations: ["task"]
+            });
+            for (let j = 0; j < grades.length; ++j) {
+                rows[i].grades[grades[j].task.id - 1] = grades[j].score;
+                total += grades[j].score;
+            }
+            rows[i].grades.push(total);
+            rows[i].grades.push(((total / max) * 100.0).toPrecision(2));
         }
-        rows[i].grades.push(total);
-        rows[i].grades.push(((total/max) * 100.0).toPrecision(2));
     }
 
     let docDefinition = {
         content: [
+            {text: "Date: " + new Date().toISOString().replace(/T/, ' ').replace(/\..+/, ''), style: "header"},
             {
                 layout: "lightHorizontalLines'", // optional"
                 table: {
@@ -263,22 +284,22 @@ router.get("/:sessionId/grades-pdf", async (req, res) => {
         ]
     };
 
-    docDefinition.content[0].table.widths.push("*");
-    for(let i = 0; i < session.tasks.length + 2; ++i) { docDefinition.content[0].table.widths.push("auto"); }
+    docDefinition.content[1].table.widths.push("*");
+    for(let i = 0; i < session.tasks.length + 2; ++i) { docDefinition.content[1].table.widths.push("auto"); }
 
-    docDefinition.content[0].table.body.push([]);
-    docDefinition.content[0].table.body[0].push("User");
+    docDefinition.content[1].table.body.push([]);
+    docDefinition.content[1].table.body[0].push("User");
 
     let max = 0;
-    for(let i = 0; i < session.tasks.length; ++i) { docDefinition.content[0].table.body[0].push("Task " + (i + 1) + " /" + session.tasks[i].maxScore); max += session.tasks[i].maxScore; }
-    docDefinition.content[0].table.body[0].push("Total /" + max);
-    docDefinition.content[0].table.body[0].push("%");
+    for(let i = 0; i < session.tasks.length; ++i) { docDefinition.content[1].table.body[0].push("Task " + (i + 1) + " /" + session.tasks[i].maxScore); max += session.tasks[i].maxScore; }
+    docDefinition.content[1].table.body[0].push("Total /" + max);
+    docDefinition.content[1].table.body[0].push("Grade %");
 
     for(let i = 0; i < rows.length; ++i) {
-        docDefinition.content[0].table.body.push([]);
-        docDefinition.content[0].table.body[i + 1].push(rows[i].user);
+        docDefinition.content[1].table.body.push([]);
+        docDefinition.content[1].table.body[i + 1].push(rows[i].user);
         for(let j = 0; j < rows[i].grades.length; ++j) {
-            docDefinition.content[0].table.body[i + 1].push(rows[i].grades[j]);
+            docDefinition.content[1].table.body[i + 1].push(rows[i].grades[j]);
         }
     }
 
@@ -302,6 +323,25 @@ router.post("/:sessionId/remove", requireToken, async (req, res) => {
 
     session.memberships = session.memberships.filter(mship => mship.user.username != req.body.username);
     await getRepository(Session).save(session);
+
+    res.sendStatus(200);
+});
+
+router.post("/:sessionId/leave", requireToken, async (req, res) => {
+    let session = await getRepository(Session).findOne(req.params.sessionId, { relations: ["memberships", "memberships.user"] });
+
+    if(await getSessionOwner(session) == req["token"].username) { return res.status(403).json({ "error": "YA ZFT!"}); }
+
+    session.memberships = session.memberships.filter(mship => mship.user.username != req["token"].username);
+    await getRepository(Session).save(session);
+
+    res.sendStatus(200);
+});
+
+router.delete("/:sessionId/", requireToken, async (req, res) => {
+    let session = await getRepository(Session).findOne(req.params.sessionId, { relations: ["memberships", "memberships.user"] });
+    if(await getSessionOwner(session) != req["token"].username) { return res.status(403).json({ "error": "You aren't allowed to set permissions"}); }
+    await getRepository(Session).delete(session);
 
     res.sendStatus(200);
 });
