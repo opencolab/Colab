@@ -88,6 +88,7 @@ export function createNamespace(nspId: string) {
                                     outputs: example.outputs,
                                 })
                             }
+                            console.log(tsks);
                             socket.emit("init-tasks", tsks);
                         }
                     );
@@ -120,12 +121,18 @@ export function createNamespace(nspId: string) {
             socket.on("set-permission", async (user, role) => {
                 if(socket["token"].user.role == Role.OWNER || socket["token"].user.role == Role.MOD) {
                     if(user != await getSessionOwner(nspId.substr(1))) {
-                        let mship = await getRepository(Membership).findOne({ where: { session: nspId.substr(1), user: user }});
+                        let mship = await getRepository(Membership).findOne({ where: { session: nspId.substr(1), user: user }, relations: [ "session", "user" ]});
                         if(mship) {
                             console.log(socket["token"].user.username + " changing perm of " + user + " to " + role);
                             mship.role = role;
                             await getRepository(Membership).save(mship);
-                            socket.broadcast.emit("set-permission", user, role);
+                            let sockets = Object.values(nsp.sockets);
+                            for(let i = 0; i < sockets.length; ++i) {
+                                if(sockets[i]["token"].user.username == user) {
+                                    sockets[i]["token"].user.role = role;
+                                }
+                            }
+                            nsp.emit("set-permission", user, role);
                         }
                     }
                 }
@@ -170,35 +177,39 @@ export function createNamespace(nspId: string) {
                                     outputs: example.outputs,
                                 })
                             }
+                            console.log(tsks);
                             nsp.emit("init-tasks", tsks);
                         }
                     );
                 }
             });
 
-            socket.on("invite", async username => {
+            socket.on("invite", async (username, fn) => {
                 if(socket["token"].user.role == Role.MOD || socket["token"].user.role == Role.OWNER) {
                     let membership = new Membership();
 
                     let user = await getRepository(User).findOne(username);
                     membership.user = user;
 
-                    let session = await getRepository(Session).findOne(nspId.substr(1));
-                    membership.session = session;
+                    if(user) {
+                        let session = await getRepository(Session).findOne(nspId.substr(1));
+                        membership.session = session;
 
-                    membership.role = Role.PENDING;
-                    await getRepository(Membership).save(membership);
+                        membership.role = Role.PENDING;
+                        await getRepository(Membership).save(membership);
 
-                    let sockets = Object.values(io.sockets.sockets).filter(skt => skt["token"].user.username == username);
-                    for(let i = 0; i < sockets.length; ++i) {
-                        sockets[i].emit("invited", { id: session.id, sname: session.sname, description: session.description, owner: await getSessionOwner(session.id) });
-                    }
-                }
+                        let sockets = Object.values(io.sockets.sockets).filter(skt => skt["token"].user.username == username);
+                        for(let i = 0; i < sockets.length; ++i) {
+                            sockets[i].emit("invited", { id: session.id, sname: session.sname, description: session.description, owner: await getSessionOwner(session.id) });
+                        }
+                        fn(true);
+                    } else { fn(false); }
+                } else { fn(false); }
             });
 
             socket.on("task-grades", (taskId, fn) => {
                 getRepository(Grade).find({ where: { session: nspId.substr(1), task: taskId }, relations: ["user"]}).then(grades => {
-                    fn(grades.map(grade => { return { user: grade.user, grade: (grade.score / grade.max).toPrecision(2) }}))
+                    fn(grades.map(grade => { return { username: grade.user.username, grade: ((grade.score / grade.max) * 100).toPrecision(2) }}))
                 });
             });
 

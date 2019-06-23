@@ -15,7 +15,6 @@ let router = express.Router();
 router.post("/run-task", requireToken, async (req, res) => {
 
     if(!req.body.sessionId) { return res.status(400).json({ "error": "Missing sessionId field" }); }
-    if(!req["token"].username) { return res.status(400).json({ "error": "Missing username field" }); }
     if(!req.body.taskId) { return res.status(400).json({ "error": "Missing taskId field" }); }
 
     let session = await getRepository(Session).findOne(req.body.sessionId);
@@ -30,7 +29,7 @@ router.post("/run-task", requireToken, async (req, res) => {
     let dataPath = path.join(sessionPath, "data/" + user.username);
     let taskPath = path.join(sessionPath, "tasks/task" + task.id + ".json");
 
-    let result = { score: 0, msgs: [] };
+    let result = { score: 0.0, msgs: [] };
 
     let taskJson = JSON.parse(fs.readFileSync(taskPath, { encoding: "utf8"}));
 
@@ -78,13 +77,14 @@ router.post("/run-task", requireToken, async (req, res) => {
 
     await getRepository(Grade).save(grade);
 
-    res.status(200).json(result);
+    console.log({ taskId: req.body.taskId, score: ((result.score/max) * 100.0), msgs: result.msgs });
+
+    res.status(200).json({ taskId: req.body.taskId, score: ((result.score/max) * 100.0), msgs: result.msgs });
 });
 
 router.post("/run", requireToken, async (req, res) => {
 
     if(!req.body.sessionId) { return res.status(400).json({ "error": "Missing sessionId field" }); }
-    if(!req["token"].username) { return res.status(400).json({ "error": "Missing username field" }); }
     if(!req.body.inputs) { return res.status(400).json({ "error": "Missing inputs array" }); }
 
     let session = await getRepository(Session).findOne(req.body.sessionId);
