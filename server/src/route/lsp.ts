@@ -87,6 +87,8 @@ router.post("/run", requireToken, async (req, res) => {
     if(!req.body.sessionId) { return res.status(400).json({ "error": "Missing sessionId field" }); }
     if(!req.body.inputs) { return res.status(400).json({ "error": "Missing inputs array" }); }
 
+    console.log(req.body.inputs);
+
     let session = await getRepository(Session).findOne(req.body.sessionId);
     let user = await getRepository(User).findOne(req["token"].username);
 
@@ -114,13 +116,19 @@ router.post("/run", requireToken, async (req, res) => {
             let outputs = bfr.replace("\n", "").split("\r");
             if(outputs[outputs.length - 1] === "") { outputs.pop(); }
 
-            res.status(200).json({ success: true, outputs: outputs });
+            console.log(outputs);
+            let rslt = { success: true, msgs: outputs };
+            res.status(200).json(rslt);
         } catch (e) {
-            res.status(200).json({ success: false, error: e.message });
+            let msgs = []; msgs.push(e.message);
+            let rslt = { success: true, msgs: msgs };
+            res.status(200).json(rslt);
         }
 
     } else {
-        res.status(200).json({ success: false, error: cmpResult["error"] });
+        let msgs = []; msgs.push(cmpResult["error"]);
+        let rslt = { success: true, msgs: msgs };
+        res.status(200).json(rslt);
     }
 });
 
