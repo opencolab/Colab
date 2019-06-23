@@ -12,7 +12,6 @@ export enum Role {
 @Entity()
 export class Membership {
 
-
     @ManyToOne(() => Session, session => session.memberships, { primary: true })
     session: Session;
 

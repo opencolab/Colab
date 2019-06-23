@@ -33,13 +33,13 @@ export class Session {
         this.sname = name;
     }
 
-    @OneToMany(() => Membership, membership => membership.session, { cascade: true, onDelete: "CASCADE"})
+    @OneToMany(() => Membership, membership => membership.session, { cascade: true })
     memberships: Membership[];
 
-    @OneToMany(() => Task, task => task.session, { cascade: true, onDelete: "CASCADE"})
+    @OneToMany(() => Task, task => task.session, { cascade: true })
     tasks: Task[];
 
-    @OneToMany(() => Grade, grade => grade.session, { cascade: true, onDelete: "CASCADE"})
+    @OneToMany(() => Grade, grade => grade.session, { cascade: true })
     grades: Grade[];
 
 }

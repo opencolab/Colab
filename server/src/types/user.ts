@@ -20,10 +20,10 @@ export class User {
     @Column()
     hash: string;
 
-    @OneToMany(() => Membership, membership => membership.user, { cascade: true, onDelete: "CASCADE" })
+    @OneToMany(() => Membership, membership => membership.user, { cascade: true })
     memberships: Membership[];
 
-    @OneToMany(() => Grade, grade => grade.user, { cascade: true, onDelete: "CASCADE"})
+    @OneToMany(() => Grade, grade => grade.user, { cascade: true })
     grades: Grade[];
 
 }

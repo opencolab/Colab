@@ -6,10 +6,29 @@ import {getRepository} from "typeorm";
 import {Membership, Role} from "../types/membership";
 import {Task} from "../types/task";
 import {Grade} from "../types/grade";
+import {User} from "../types/user";
+import {Session} from "../types/session";
+import {getSessionOwner, writeTest} from "./session";
 
 io.use(handleToken);
 io.on("connection", socket => {
     console.log("default: " + socket["token"].user.username + " connected!");
+
+    getRepository(User).findOne(socket["token"].user.username, { relations: ["memberships", "memberships.session", "memberships.user"] }).then(async user => {
+            let sessions = user.memberships.filter(mship => mship.role === Role.PENDING && mship.role != null).map( (mship) => {
+                return {
+                    id: mship.session.id,
+                    sname: mship.session.sname,
+                    description: mship.session.description,
+                    privacy: mship.session.privacy
+                }
+            });
+            for(let i = 0; i < sessions.length; ++i) { sessions[i]["owner"] = await getSessionOwner(sessions[i]["id"]); }
+            console.log("emiting invites to " + socket["token"].user.username);
+            console.log(sessions);
+            socket.emit("init-invites", sessions);
+        }
+    );
 
     socket.on("disconnect", () => {
         console.log("default: " + socket["token"].user.username + " disconnected!");
@@ -63,6 +82,7 @@ export function createNamespace(nspId: string) {
                                 let example = JSON.parse(fs.readFileSync(path.join(__dirname, "../../sessions/" + nspId.substr(1) + "/tasks/task" + tasks[i].id + ".json"), { encoding: "utf8"})).cases[0];
                                 tsks.push({
                                     taskId: tasks[0].id,
+                                    name: tasks[0].name,
                                     description: tasks[0].description,
                                     inputs: example.inputs,
                                     outputs: example.outputs,
@@ -88,12 +108,92 @@ export function createNamespace(nspId: string) {
                         let example = JSON.parse(fs.readFileSync(path.join(__dirname, "../../sessions/" + nspId.substr(1) + "/tasks/task" + task.id + ".json"), { encoding: "utf8"})).cases[0];
                         fn({
                             taskId: task.id,
+                            name: task.name,
                             description: task.description,
                             inputs: example.inputs,
                             outputs: example.outputs,
                         })
                     }
                 );
+            });
+
+            socket.on("set-permission", async (user, role) => {
+                if(socket["token"].user.role == Role.OWNER || socket["token"].user.role == Role.MOD) {
+                    if(user != await getSessionOwner(nspId.substr(1))) {
+                        let mship = await getRepository(Membership).findOne({ where: { session: nspId.substr(1), user: user }});
+                        if(mship) {
+                            console.log(socket["token"].user.username + " changing perm of " + user + " to " + role);
+                            mship.role = role;
+                            await getRepository(Membership).save(mship);
+                            socket.broadcast.emit("set-permission", user, role);
+                        }
+                    }
+                }
+            });
+
+            socket.on("create-task", async tsk => {
+                if(socket["token"].user.role == Role.OWNER || socket["token"].user.role == Role.MOD) {
+                    let task = new Task();
+
+                    let session = await getRepository(Session).findOne(nspId.substr(1), { relations: ["tasks"] });
+                    task.id = session.tasks.length + 1;
+                    task.name = tsk.name;
+                    task.session = session;
+                    task.description = tsk.description;
+                    task.cases = tsk.cases.length;
+
+                    for(let i = 0; i < tsk.cases.length; ++i) {
+                        if(tsk.cases[i].weight) {
+                            if(tsk.cases[i].weight != "") { tsk.cases[i].weight = parseInt(tsk.cases[i].weight); }
+                            else {
+                                delete tsk.cases[i].hint;
+                            }
+                        }
+
+                    }
+
+                    task.maxScore = 0;
+                    for(let i = 0; i < tsk.cases.length; ++i) {
+                        if(tsk.cases[i].weight) { task.maxScore += tsk.cases[i].weight; } else { task.maxScore += 1; }
+                    }
+
+                    task = await getRepository(Task).save(task);
+                    writeTest(session.id, task.id, tsk.cases);
+                    getRepository(Task).find({ where: { session: nspId.substr(1) }}).then(tasks => {
+                            let tsks = [];
+                            for(let i = 0; i < tasks.length; ++i) {
+                                let example = JSON.parse(fs.readFileSync(path.join(__dirname, "../../sessions/" + nspId.substr(1) + "/tasks/task" + tasks[i].id + ".json"), { encoding: "utf8"})).cases[0];
+                                tsks.push({
+                                    taskId: tasks[0].id,
+                                    description: tasks[0].description,
+                                    inputs: example.inputs,
+                                    outputs: example.outputs,
+                                })
+                            }
+                            nsp.emit("init-tasks", tsks);
+                        }
+                    );
+                }
+            });
+
+            socket.on("invite", async username => {
+                if(socket["token"].user.role == Role.MOD || socket["token"].user.role == Role.OWNER) {
+                    let membership = new Membership();
+
+                    let user = await getRepository(User).findOne(username);
+                    membership.user = user;
+
+                    let session = await getRepository(Session).findOne(nspId.substr(1));
+                    membership.session = session;
+
+                    membership.role = Role.PENDING;
+                    await getRepository(Membership).save(membership);
+
+                    let sockets = Object.values(io.sockets.sockets).filter(skt => skt["token"].user.username == username);
+                    for(let i = 0; i < sockets.length; ++i) {
+                        sockets[i].emit("invited", { id: session.id, sname: session.sname, description: session.description, owner: await getSessionOwner(session.id) });
+                    }
+                }
             });
 
             socket.on("task-grades", (taskId, fn) => {

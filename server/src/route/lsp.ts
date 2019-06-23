@@ -15,11 +15,11 @@ let router = express.Router();
 router.post("/run-task", requireToken, async (req, res) => {
 
     if(!req.body.sessionId) { return res.status(400).json({ "error": "Missing sessionId field" }); }
-    if(!req.body.username) { return res.status(400).json({ "error": "Missing username field" }); }
+    if(!req["token"].username) { return res.status(400).json({ "error": "Missing username field" }); }
     if(!req.body.taskId) { return res.status(400).json({ "error": "Missing taskId field" }); }
 
     let session = await getRepository(Session).findOne(req.body.sessionId);
-    let user = await getRepository(User).findOne(req.body.username);
+    let user = await getRepository(User).findOne(req["token"].username);
     let task = await getRepository(Task).findOne({ session: req.body.sessionId, id: req.body.taskId});
 
     if(!session) { return res.status(400).json({ "error": "Session does not exist" }); }
@@ -84,11 +84,11 @@ router.post("/run-task", requireToken, async (req, res) => {
 router.post("/run", requireToken, async (req, res) => {
 
     if(!req.body.sessionId) { return res.status(400).json({ "error": "Missing sessionId field" }); }
-    if(!req.body.username) { return res.status(400).json({ "error": "Missing username field" }); }
+    if(!req["token"].username) { return res.status(400).json({ "error": "Missing username field" }); }
     if(!req.body.inputs) { return res.status(400).json({ "error": "Missing inputs array" }); }
 
     let session = await getRepository(Session).findOne(req.body.sessionId);
-    let user = await getRepository(User).findOne(req.body.username);
+    let user = await getRepository(User).findOne(req["token"].username);
 
     if(!session) { return res.status(400).json({ "error": "Session does not exist" }); }
     if(!user) { return res.status(400).json({ "error": "User does not exist" }); }

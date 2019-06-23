@@ -23,7 +23,7 @@ export class Task {
     @Column()
     maxScore: number;
 
-    @OneToMany(() => Grade, grade => grade.task, { cascade: true, onDelete: "CASCADE"})
+    @OneToMany(() => Grade, grade => grade.task, { cascade: true })
     grades: Grade[];
 
 }

@@ -9,7 +9,6 @@ import {User} from "../types/user";
 import {Task} from "../types/task";
 import {Grade} from "../types/grade";
 import {createNamespace} from "./sockets";
-import {io} from "../app";
 
 let router = express.Router();
 
@@ -50,42 +49,6 @@ router.get("/invited", requireToken, async (req, res) => {
     });
     for(let i = 0; i < sessions.length; ++i) { sessions[i]["owner"] = await getSessionOwner(sessions[i]["id"]); }
     res.status(200).json({ sessions: sessions });
-});
-
-router.post("/invite",  requireToken, async (req, res) => {
-    let user = await getRepository(User).findOne(req.body.username);
-    let session = await getRepository(Session).findOne(req.body.session, { relations: ["memberships, memberships.user, memberships.session"]});
-
-    if(!user) { return res.status(400).json({ "error": "User doesn't exist"} ); }
-    if(!session) { return res.status(400).json({ "error": "Session doesn't exist"} ); }
-
-    if(session.memberships.filter(
-        mship => (
-            mship.role == Role.OWNER &&
-            mship.user.username == req["token"].username) &&
-            mship.session.id == req.body.session
-    ).length != 0) {
-        let membership = new Membership();
-        membership.user = user;
-        membership.session = session;
-        membership.role = Role.PENDING;
-        await getRepository(Membership).save(membership);
-
-        for(let i = 0; i < Object.values(io.sockets.sockets).length; ++i) {
-            if(Object.values(io.sockets.sockets)[i]["token"].username == user.username) {
-                Object.values(io.sockets.sockets)[i].emit("invited", {
-                    id: session.id,
-                    sname: session.sname,
-                    description: session.description,
-                    privacy: session.privacy
-                });
-            }
-        }
-
-        res.sendStatus(200);
-    } else {
-        res.status(403).json({ "error": "You are not authorized for invitation"} );
-    }
 });
 
 router.get("/join/:sessionId",  requireToken, async (req, res) => {
@@ -316,24 +279,28 @@ router.get("/:sessionId/grades-pdf", async (req, res) => {
 
 router.post("/:sessionId/remove", requireToken, async (req, res) => {
 
-    let session = await getRepository(Session).findOne(req.params.sessionId, { relations: ["memberships", "memberships.user"] });
+    let session = await getRepository(Session).findOne(req.params.sessionId, { relations: ["memberships", "memberships.user", "memberships.session"] });
     if(await getSessionOwner(session) != req["token"].username) { return res.status(403).json({ "error": "You aren't allowed to set permissions"}); }
 
     if(!req.body.username) { res.status(400).json({ "error": "Missing username field" } ); }
 
-    session.memberships = session.memberships.filter(mship => mship.user.username != req.body.username);
-    await getRepository(Session).save(session);
+    let membership = await getRepository(Membership).findOne({where: { session: session, user: req["token"].username }});
+    if(membership) {
+        await getRepository(Membership).delete(membership);
+    }
 
     res.sendStatus(200);
 });
 
-router.post("/:sessionId/leave", requireToken, async (req, res) => {
-    let session = await getRepository(Session).findOne(req.params.sessionId, { relations: ["memberships", "memberships.user"] });
+router.get("/leave/:sessionId", requireToken, async (req, res) => {
+    let session = await getRepository(Session).findOne(req.params.sessionId, { relations: ["memberships", "memberships.user", "memberships.session"] });
 
     if(await getSessionOwner(session) == req["token"].username) { return res.status(403).json({ "error": "YA ZFT!"}); }
 
-    session.memberships = session.memberships.filter(mship => mship.user.username != req["token"].username);
-    await getRepository(Session).save(session);
+    let membership = await getRepository(Membership).findOne({where: { session: session, user: req["token"].username }});
+    if(membership) {
+        await getRepository(Membership).delete(membership);
+    }
 
     res.sendStatus(200);
 });
@@ -353,7 +320,7 @@ router.get("/:sessionId/members",async (req, res) => {
     res.status(200).json(users);
 });
 
-async function getSessionOwner(sessionId) {
+export async function getSessionOwner(sessionId) {
     let session = await getRepository(Session).findOne(sessionId, { relations: ["memberships", "memberships.user"] });
     return session.memberships.filter(mship => mship.role === Role.OWNER)[0].user.username;
 }
@@ -372,7 +339,7 @@ function createUserFiles(sessionId: string, username: string) {
     }
 }
 
-function writeTest(sessionId: string, taskId: number, cases) {
+export function writeTest(sessionId: string, taskId: number, cases) {
     fs.mkdirSync(path.join(__dirname, "../../sessions/" + sessionId + "/tasks"), { recursive: true });
     fs.writeFileSync(path.join(__dirname, "../../sessions/" + sessionId + "/tasks/task" + taskId + ".json"), JSON.stringify({
         cases: cases
