@@ -68,6 +68,8 @@ router.get("/join/:sessionId",  requireToken, async (req, res) => {
         }
     }
 
+    console.log("membership found? " + mshipi);
+
     switch (session.privacy) {
         case Privacy.PUBLIC:
         case Privacy.HIDDEN:
@@ -80,20 +82,23 @@ router.get("/join/:sessionId",  requireToken, async (req, res) => {
                 createUserFiles(session.id, req["token"].username);
                 createNamespace("/" + session.id);
             }
-            res.sendStatus(200);
-            break;
+            console.log("public: sending status to " + req["token"].username);
+            return res.sendStatus(200);
         case Privacy.PRIVATE:
-            if(mshipi == -1) { return res.status(403).json({ "error": "Not invited to this session" }); } else {
+            if(mshipi == -1) { return res.status(403).json({ "error": "Not invited to this session" }); }
+            else {
                 if(session.memberships[mshipi].role == Role.PENDING) {
                     session.memberships[mshipi].role = Role.GHOST;
                     await getRepository(Session).save(session);
+                    await getRepository(Membership).save(session.memberships[mshipi]);
                     createUserFiles(session.id, req["token"].username);
                     createNamespace("/" + session.id);
                 }
-                res.sendStatus(200);
             }
-            break;
+            console.log("private: sending status to " + req["token"].username);
+            return res.sendStatus(200);
     }
+    return res.sendStatus(200);
 });
 
 router.post("/create-session", requireToken, async (req, res) => {
