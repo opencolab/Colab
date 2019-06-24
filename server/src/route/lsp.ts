@@ -14,6 +14,8 @@ let router = express.Router();
 
 router.post("/run-task", requireToken, async (req, res) => {
 
+    console.log("running task");
+
     if(!req.body.sessionId) { return res.status(400).json({ "error": "Missing sessionId field" }); }
     if(!req.body.taskId) { return res.status(400).json({ "error": "Missing taskId field" }); }
 
@@ -45,15 +47,23 @@ router.post("/run-task", requireToken, async (req, res) => {
                 let pr = cpp.spawn("./main.exe", [], { cwd: dataPath });
 
                 pr.childProcess.stdout.setEncoding("utf-8");
-                pr.childProcess.stdout.on("data", data => { bfr += data; });
+                pr.childProcess.stdout.on("data", data => { bfr += data; console.log(bfr); });
 
                 for(let j = 0; j < taskJson.cases[i].inputs.length; ++j) { pr.childProcess.stdin.write(taskJson.cases[i].inputs[j] + "\r\n"); }
                 pr.childProcess.stdin.end();
 
                 await pr;
 
+                console.log(bfr);
+
                 let outputs = bfr.replace("\n", "").split("\r");
                 if(outputs[outputs.length - 1] === "") { outputs.pop(); }
+
+                console.log(JSON.stringify(outputs));
+                console.log(JSON.stringify(taskJson.cases[i].outputs));
+
+                console.log("compared stuff");
+
                 if(JSON.stringify(outputs) === JSON.stringify(taskJson.cases[i].outputs)) {
                     if(taskJson.cases[i].weight) { result.score += taskJson.cases[i].weight; } else { result.score++; }
                 } else {
