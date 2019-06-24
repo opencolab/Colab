@@ -54,19 +54,25 @@ export function createNamespace(nspId: string) {
 
                     //If Mod+ current-users are all users / user-joined to all
                     if(socket["token"].user.role == Role.OWNER || socket["token"].user.role == Role.MOD) {
+                        console.log("current users");
+                        console.log(Object.values(nsp.sockets).filter(skt => skt["token"].user.username != socket["token"].user.username).map(skt => skt["token"].user));
                         socket.emit("current-users", Object.values(nsp.sockets)
                                 .filter(skt => skt["token"].user.username != socket["token"].user.username)
                                 .map(skt => skt["token"].user), mship.role,
                             () => {
+                                console.log("user joined " + socket["token"].user);
                                 nsp.emit("user-joined", socket["token"].user);
                                 socket.join("mods");
                             }
                         );
                     } else { //If User current-users are only mods / user-joined to mods only
+                        console.log("current users");
+                        console.log(Object.values(nsp.sockets).filter(skt => skt["token"].user.username != socket["token"].user.username && (skt["token"].user.role == Role.OWNER || skt["token"].user.role == Role.MOD)).map(skt => skt["token"].user));
                         socket.emit("current-users", Object.values(nsp.sockets)
                                 .filter(skt => skt["token"].user.username != socket["token"].user.username && (skt["token"].user.role == Role.OWNER || skt["token"].user.role == Role.MOD))
                                 .map(skt => skt["token"].user ), mship.role,
                             () => {
+                                console.log("user joined " + socket["token"].user);
                                 socket.emit("user-joined", socket["token"].user);
                                 nsp.in("mods").emit("user-joined", socket["token"].user);
                             }
@@ -132,7 +138,16 @@ export function createNamespace(nspId: string) {
                                     sockets[i]["token"].user.role = role;
                                 }
                             }
-                            nsp.emit("set-permission", user, role);
+                            for(let i = 0; i < sockets.length; ++i) {
+                                if(sockets[i]["token"].user.role == Role.GHOST) {
+                                    sockets[i].emit("current-users", Object.values(nsp.sockets)
+                                        .filter(skt => skt["token"].user.username == sockets[i]["token"].user.username || (skt["token"].user.role == Role.OWNER || skt["token"].user.role == Role.MOD))
+                                        .map(skt => skt["token"].user ), sockets[i]["token"].user.role, () => {});
+                                } else if(sockets[i]["token"].user.role == Role.MOD || sockets[i]["token"].user.role == Role.OWNER) {
+                                    sockets[i].emit("current-users", Object.values(nsp.sockets)
+                                        .map(skt => skt["token"].user), sockets[i]["token"].user.role, () => {});
+                                }
+                            }
                         }
                     }
                 }

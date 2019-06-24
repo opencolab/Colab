@@ -35,6 +35,9 @@ app.use("/sessions", sessionRouter);
 import { router as lspRouter } from "./route/lsp";
 app.use("/lsp", lspRouter);
 
+import { router as reportRouter } from "./route/report";
+app.use("/reports", reportRouter);
+
 import "./route/sockets";
 
 createConnection({
