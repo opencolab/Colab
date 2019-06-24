@@ -14,7 +14,9 @@ let router = express.Router();
 
 router.get("/", async (req, res) => {
     let sessionRepo = getRepository(Session);
-    let sessions = await sessionRepo.find({ select: ["id", "sname", "description"], where: { hidden: false } });
+    let sessions = await sessionRepo.find({ select: ["id", "sname", "description"], where: { privacy: Privacy.PUBLIC } });
+
+    if(req.query.sname) { sessions = sessions.filter(session => session.sname.includes(req.query.sname)); }
 
     for(let i = 0; i < sessions.length; ++i) { sessions[i]["owner"] = await getSessionOwner(sessions[i]["id"]); }
     res.status(200).json({ sessions: sessions });
@@ -52,15 +54,16 @@ router.get("/invited", requireToken, async (req, res) => {
 });
 
 router.get("/join/:sessionId",  requireToken, async (req, res) => {
+    console.log("join service called by " + req["token"].username);
     let session = await getRepository(Session).findOne(req.params.sessionId, {relations: ["memberships", "memberships.user", "memberships.session"] });
     let membershipRepo = getRepository(Membership);
-    let membership = null;
+    let mshipi = -1;
 
     if(!session) { return res.status(400).json({ "error": "Session doesn't exist"}); }
 
     for(let i = 0; i < session.memberships.length; ++i) {
         if(session.memberships[i].user.username == req["token"].username) {
-            membership = session.memberships[i];
+            mshipi = i;
             break;
         }
     }
@@ -68,27 +71,29 @@ router.get("/join/:sessionId",  requireToken, async (req, res) => {
     switch (session.privacy) {
         case Privacy.PUBLIC:
         case Privacy.HIDDEN:
-            if(!membership) {
-                membership = new Membership();
+            if(mshipi == -1) {
+                let membership = new Membership();
                 membership.session = session;
                 membership.user = req["token"].username;
                 membership.role = Role.GHOST;
                 await membershipRepo.save(membership);
+                createUserFiles(session.id, req["token"].username);
+                createNamespace("/" + session.id);
             }
             res.sendStatus(200);
             break;
         case Privacy.PRIVATE:
-            if(!membership) { return res.status(403).json({ "error": "Not invited to this session" }); } else {
-                if(membership.role == Role.PENDING) {
-                    membership.role = Role.GHOST;
-                    await membershipRepo.save(membership);
+            if(mshipi == -1) { return res.status(403).json({ "error": "Not invited to this session" }); } else {
+                if(session.memberships[mshipi].role == Role.PENDING) {
+                    session.memberships[mshipi].role = Role.GHOST;
+                    await getRepository(Session).save(session);
+                    createUserFiles(session.id, req["token"].username);
+                    createNamespace("/" + session.id);
                 }
                 res.sendStatus(200);
             }
             break;
     }
-    createUserFiles(session.id, req["token"].username);
-    createNamespace("/" + session.id);
 });
 
 router.post("/create-session", requireToken, async (req, res) => {
