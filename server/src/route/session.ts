@@ -207,27 +207,27 @@ router.get("/:sessionId/grades-pdf", async (req, res) => {
 
     let rows = [];
 
-    for(let i = 0; i < session.memberships.length; ++i) {
-        if(session.memberships[i].role == Role.GHOST) {
-            let max = 0;
-            let total = 0;
-            rows.push({user: session.memberships[i].user.username, grades: []});
-            for (let j = 0; j < session.tasks.length; ++j) {
-                rows[i].grades.push(0);
-                max += session.tasks[j].maxScore;
-            }
+    let memberships = session.memberships.filter(mship => mship.role == Role.GHOST);
 
-            let grades = await gradesRepo.find({
-                where: {session: session, user: session.memberships[i].user},
-                relations: ["task"]
-            });
-            for (let j = 0; j < grades.length; ++j) {
-                rows[i].grades[grades[j].task.id - 1] = grades[j].score;
-                total += grades[j].score;
-            }
-            rows[i].grades.push(total);
-            rows[i].grades.push(((total / max) * 100.0).toPrecision(2));
+    for(let i = 0; i < memberships.length; ++i) {
+        let max = 0;
+        let total = 0;
+        rows[0] = {user: memberships[i].user.username, grades: []};
+        for (let j = 0; j < session.tasks.length; ++j) {
+            rows[i].grades.push(0);
+            max += session.tasks[j].maxScore;
         }
+
+        let grades = await gradesRepo.find({
+            where: {session: session, user: memberships[i].user},
+            relations: ["task"]
+        });
+        for (let j = 0; j < grades.length; ++j) {
+            rows[i].grades[grades[j].task.id - 1] = grades[j].score;
+            total += grades[j].score;
+        }
+        rows[i].grades.push(total);
+        rows[i].grades.push(((total / max) * 100.0).toPrecision(2));
     }
 
     let docDefinition = {

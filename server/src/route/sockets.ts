@@ -81,9 +81,9 @@ export function createNamespace(nspId: string) {
                             for(let i = 0; i < tasks.length; ++i) {
                                 let example = JSON.parse(fs.readFileSync(path.join(__dirname, "../../sessions/" + nspId.substr(1) + "/tasks/task" + tasks[i].id + ".json"), { encoding: "utf8"})).cases[0];
                                 tsks.push({
-                                    taskId: tasks[0].id,
-                                    name: tasks[0].name,
-                                    description: tasks[0].description,
+                                    taskId: tasks[i].id,
+                                    name: tasks[i].name,
+                                    description: tasks[i].description,
                                     inputs: example.inputs,
                                     outputs: example.outputs,
                                 })
@@ -171,8 +171,9 @@ export function createNamespace(nspId: string) {
                             for(let i = 0; i < tasks.length; ++i) {
                                 let example = JSON.parse(fs.readFileSync(path.join(__dirname, "../../sessions/" + nspId.substr(1) + "/tasks/task" + tasks[i].id + ".json"), { encoding: "utf8"})).cases[0];
                                 tsks.push({
-                                    taskId: tasks[0].id,
-                                    description: tasks[0].description,
+                                    taskId: tasks[i].id,
+                                    name: tasks[i].name,
+                                    description: tasks[i].description,
                                     inputs: example.inputs,
                                     outputs: example.outputs,
                                 })
