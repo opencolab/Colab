@@ -9,6 +9,7 @@ import {User} from "../types/user";
 import {Task} from "../types/task";
 import {Grade} from "../types/grade";
 import {createNamespace} from "./sockets";
+import multer from "multer";
 
 let router = express.Router();
 
@@ -107,16 +108,36 @@ router.get("/join/:sessionId",  requireToken, async (req, res) => {
     return res.sendStatus(200);
 });
 
-router.post("/create-session", requireToken, async (req, res) => {
-    if(!req.body.session) { return res.status(400).json({ "error": "Missing namespace object" }); }
-    if(!req.body.session.sname) { return res.status(400).json({ "error": "Missing sname field" }); }
-    let session = new Session(req.body.session.sname);
+let spicStorage = multer.diskStorage({
+    destination: (req, file, cb) => { cb(null, path.join(__dirname, "../../spics/")); },
+    filename: (req, file, cb) => { cb(null, req["token"].username + path.extname(file.originalname)); }
+});
 
-    if(req.body.session.privacy) { session.privacy = req.body.session.privacy; }
-    if(req.body.session.description) { session.description = req.body.session.description; }
+let spicFilter = (req, file, cb) => {
+    if(!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) { return cb(new Error("Not a supported image type"), false); }
+    cb(null, true);
+};
+
+let spicUpload = multer({ storage: spicStorage, fileFilter: spicFilter });
+
+router.post("/create-session", requireToken, spicUpload.single("spic"), async (req, res) => {
+    if(!req.body.sname) { return res.status(400).json({ "error": "Missing sname field" }); }
+    let session = new Session(req.body.sname);
+
+    if(req.body.privacy) { session.privacy = req.body.privacy; }
+    if(req.body.description) { session.description = req.body.description; }
 
     let sessionRepo = getRepository(Session);
     session = await sessionRepo.save(session);
+
+    console.log(req.file);
+
+    if(req.file != undefined) {
+        console.log("I got the img");
+        fs.writeFileSync(path.join(__dirname, "../../spics/") + session.id + ".meta", path.extname(req.file.originalname).slice(1));
+        let ext = path.extname(req.file.originalname);
+        fs.renameSync(req.file.path, path.join(__dirname, "../../spics/" + session.id + ext));
+    }
 
     let membershipRepo = getRepository(Membership);
 
@@ -135,6 +156,16 @@ router.post("/create-session", requireToken, async (req, res) => {
 
     res.status(200).json({ session: { id: session.id }});
 });
+
+router.get("/spic/:sessionId", (req, res) => {
+    let ppicPath = path.join(__dirname, "../../spics/" + req.params.sessionId + ".meta");
+    if(fs.existsSync(ppicPath)) { ppicPath = ppicPath.slice(0, -5) + "." + fs.readFileSync(ppicPath); }
+    else {
+        ppicPath = path.join(__dirname, "../../spics/default.jpg");
+    }
+    res.sendFile(ppicPath);
+});
+
 
 router.post("/create-task", requireToken, async (req, res) => {
     if(!req.body.sessionId) { return res.status(400).json({ "error": "Missing sessionId field" }); }
