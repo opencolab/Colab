@@ -225,7 +225,7 @@ export function createNamespace(nspId: string) {
 
             socket.on("task-grades", (taskId, fn) => {
                 getRepository(Grade).find({ where: { session: nspId.substr(1), task: taskId }, relations: ["user"]}).then(grades => {
-                    fn(grades.map(grade => { return { username: grade.user.username, grade: ((grade.score / grade.max) * 100).toPrecision(2) }}))
+                    fn(grades.map(grade => { return { username: grade.user.username, grade: ((grade.score / grade.max) * 100.0) }}))
                 });
             });
 
