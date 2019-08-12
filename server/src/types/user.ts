@@ -1,4 +1,6 @@
-import {Entity, PrimaryColumn, Column } from "typeorm";
+import { Entity, PrimaryColumn, Column, OneToMany } from "typeorm";
+import { Membership } from "./membership";
+import {Grade} from "./grade";
 
 @Entity()
 export class User {
@@ -17,5 +19,11 @@ export class User {
 
     @Column()
     hash: string;
+
+    @OneToMany(() => Membership, membership => membership.user, { cascade: true })
+    memberships: Membership[];
+
+    @OneToMany(() => Grade, grade => grade.user, { cascade: true })
+    grades: Grade[];
 
 }

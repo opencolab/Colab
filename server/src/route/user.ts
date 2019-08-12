@@ -1,5 +1,5 @@
 import express from "express";
-import { getRepository } from "typeorm";
+import {getRepository, Like} from "typeorm";
 import { User } from "../types/user";
 import path from "path";
 import fs from "fs";
@@ -25,22 +25,28 @@ router.post("/update-profile", requireToken, ppicUpload.single("ppic"), async (r
 
     let user = await userRepo.findOne(req["token"].username);
 
-    if(req.body.oldHash == user.hash) {
+    if(req.body.hash) {
+        if(req.body.oldHash == user.hash) {
+            user.hash = req.body.hash;
+        } else {
+            if(req.file != undefined) {
+                fs.unlinkSync(req.file.path);
+            }
+            return res.status(403).json({ error: "Bad Credentials" });
+        }
+    }
+
+    if(req.file != undefined) {
         fs.renameSync(req.file.path, req.file.path.slice(0, -4));
         fs.writeFileSync(path.join(__dirname, "../../ppics/") + req["token"].username + ".meta", path.extname(req.file.originalname).slice(1));
-
-        if(req.body.email) { user.email = req.body.email; }
-        if(req.body.fname) { user.fname = req.body.fname; }
-        if(req.body.lname) { user.lname = req.body.lname; }
-        if(req.body.hash) { user.hash = req.body.hash; }
-
-        await userRepo.save(user);
-
-        res.sendStatus(200);
-    } else {
-        fs.unlinkSync(req.file.path);
-        res.status(403).json({ error: "Bad Credentials" });
     }
+    if(req.body.email) { user.email = req.body.email; }
+    if(req.body.fname) { user.fname = req.body.fname; }
+    if(req.body.lname) { user.lname = req.body.lname; }
+
+
+    await userRepo.save(user);
+    res.sendStatus(200);
 });
 
 router.get("/ppic/:username", (req, res) => {
@@ -61,6 +67,12 @@ router.get("/profile/:username", async (req, res) => {
     } else {
         res.status(404).json({error: "User does not exist"})
     }
+});
+
+router.get("/", async (req, res) => {
+    let users = await getRepository(User).find({ select: ["username", "email", "fname", "lname"]});
+    if(req.query.username) { users = users.filter(user => user.username.includes(req.query.username)); }
+    res.status(200).json({ users: users });
 });
 
 export { router }

@@ -1,30 +1,45 @@
-import { Suser } from "./suser";
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import { Membership } from "./membership";
+import { Task } from "./task";
+import { Grade } from "./grade";
 
+export enum Privacy {
+    PUBLIC = "public",
+    HIDDEN = "hidden",
+    PRIVATE = "private"
+}
+
+@Entity()
 export class Session {
 
-    name: string;
-    owner: Suser;
-    users: Array<Suser>;
+    @PrimaryGeneratedColumn("uuid")
+    id: string;
+
+    @Column()
+    sname: string;
+
+    @Column({
+        type: "enum",
+        enum: Privacy,
+        default: Privacy.PUBLIC
+    })
+    privacy: Privacy;
+
+
+    @Column({ default: "" })
+    description: string;
 
     constructor(name: string) {
-        this.name = name;
-        this.users = new Array<Suser>();
+        this.sname = name;
     }
 
-    addUser(username: string, socketId) {
-        let user = new Suser(username, socketId);
-        this.users.push(user);
-        return user;
-    }
+    @OneToMany(() => Membership, membership => membership.session, { cascade: true })
+    memberships: Membership[];
 
-    removeUser(userID: string) {
-        this.users = this.users.filter((user) => { return (user.socketId != userID); });
-    }
+    @OneToMany(() => Task, task => task.session, { cascade: true })
+    tasks: Task[];
 
-    getUsernames() {
-        let usernames = [];
-        this.users.forEach((user) => { usernames.push(user.username); });
-        return usernames;
-    }
+    @OneToMany(() => Grade, grade => grade.session, { cascade: true })
+    grades: Grade[];
 
 }
