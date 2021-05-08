@@ -32,6 +32,6 @@
     "mysql": "^2.17.1",
     "reflect-metadata": "^0.1.13",
     "socket.io": "^2.2.0",
-    "typeorm": "^0.2.18"
+    "typeorm": "^0.2.25"
   }
 }
